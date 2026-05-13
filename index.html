@@ -1301,6 +1301,18 @@
         <div class="live-dot"></div>
         LIVE
       </div>
+      <div id="dataStatus" style="
+        font-size:10px;
+        color:var(--gold);
+        font-family:var(--font-mono);
+        padding:4px 10px;
+        border:1px solid rgba(245,200,66,0.2);
+        border-radius:20px;
+        background:rgba(245,200,66,0.08);
+      ">
+        DATA FEEDS STABILIZING
+      </div>
+
       <div class="header-time" id="headerTime">--:--:-- UTC</div>
       <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
         <span class="refresh-icon" id="refreshIcon">↻</span>
@@ -1775,7 +1787,7 @@
 // Auto-refresh every 45 seconds without full page reload
 
 const CONFIG = {
-  REFRESH_INTERVAL: 45000,
+  REFRESH_INTERVAL: 60000,
   COINGECKO: 'https://api.coingecko.com/api/v3',
   MAX_RETRIES: 2,
   RETRY_DELAY: 800,
@@ -1800,15 +1812,48 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 //   5. Never block the UI — always return best available data
 // =====================================================================
 
-// 6 proxy builders — tried in random order to distribute load
+// =========================
+// STABLE PROXY LAYER
+// =========================
+
+// Reduced to only the most reliable proxies.
+// Many free proxies fail randomly or return HTML instead of JSON.
+
 const PROXY_BUILDERS = [
   url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url => `https://thingproxy.freeboard.io/fetch/${url}`,
-  url => `https://proxy.cors.sh/${url}`,
-  url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
-  url => `https://yacdn.org/proxy/${url}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
 ];
+
+// Shuffle proxy order to distribute traffic
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// =========================
+// RESPONSE VALIDATION
+// =========================
+
+async function safeJsonResponse(response) {
+  const text = await response.text();
+
+  // Detect HTML error pages
+  if (
+    text.startsWith('<!DOCTYPE') ||
+    text.startsWith('<html') ||
+    text.includes('Too Many Requests') ||
+    text.includes('Access Denied')
+  ) {
+    throw new Error('Invalid proxy response');
+  }
+
+  return JSON.parse(text);
+}
+
 
 // Shuffle array — randomise proxy order each call to spread load
 function shuffle(arr) {
@@ -1837,15 +1882,31 @@ const CACHE = {
   }
 };
 
-async function fetchRaw(url, timeout = 8000) {
+async function fetchRaw(url, timeout = 10000) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeout);
+
+  const timer = setTimeout(() => {
+    ctrl.abort();
+  }, timeout);
+
   try {
-    const r = await fetch(url, { signal: ctrl.signal, mode: 'cors' });
+    const response = await fetch(url, {
+      signal: ctrl.signal,
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
     clearTimeout(timer);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r;
-  } catch(e) {
+
+    if (!response.ok) {
+      throw new Error('HTTP ' + response.status);
+    }
+
+    return response;
+
+  } catch (e) {
     clearTimeout(timer);
     throw e;
   }
@@ -1880,14 +1941,7 @@ async function fetchYahooSymbol(symbol) {
         const r = await fetchRaw(proxiedUrl, 7000);
         let json;
 
-        // allorigins wraps in { contents: "..." }
-        if (proxiedUrl.includes('allorigins')) {
-          const wrap = await r.json();
-          if (!wrap?.contents) continue;
-          json = JSON.parse(wrap.contents);
-        } else {
-          json = await r.json();
-        }
+        json = await safeJsonResponse(r);
 
         const result = parseYahooResponse(json);
         if (result) {
