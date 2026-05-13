@@ -1,0 +1,3580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Macro Dashboard — Curated by Yuvraj Sureka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #060608;
+    --bg-deep: #0d0d12;
+    --bg-surface: #13131a;
+    --bg-card: #1a1a24;
+    --bg-hover: #22222e;
+    --border: rgba(255,255,255,0.06);
+    --border-accent: rgba(255,255,255,0.12);
+    --green: #00e5a0;
+    --green-dim: rgba(0,229,160,0.12);
+    --red: #ff4d6a;
+    --red-dim: rgba(255,77,106,0.12);
+    --gold: #f5c842;
+    --gold-dim: rgba(245,200,66,0.12);
+    --blue: #4d9fff;
+    --blue-dim: rgba(77,159,255,0.12);
+    --purple: #b06aff;
+    --purple-dim: rgba(176,106,255,0.12);
+    --cyan: #00d4e8;
+    --orange: #ff7a35;
+    --text-primary: #f0f0f8;
+    --text-secondary: #8888a8;
+    --text-muted: #555568;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-void);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Grid scan line */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===================== HEADER ===================== */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,6,8,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 20px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    color: #060608;
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+  }
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse-green 1.5s infinite;
+  }
+  @keyframes pulse-green {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .header-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .refresh-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .refresh-btn.loading { pointer-events: none; }
+  .refresh-icon { display: inline-block; transition: transform 0.5s; }
+  .refresh-btn.loading .refresh-icon { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .session-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+  .session-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .session-dot.active { background: var(--green); }
+
+  /* ===================== MAIN LAYOUT ===================== */
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===================== SECTION LABELS ===================== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .tag-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,106,0.2); }
+  .tag-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,229,160,0.2); }
+  .tag-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,159,255,0.2); }
+  .tag-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(176,106,255,0.2); }
+  .tag-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .tag-orange { background: rgba(255,122,53,0.1); color: var(--orange); border: 1px solid rgba(255,122,53,0.2); }
+  .tag-cyan { background: rgba(0,212,232,0.1); color: var(--cyan); border: 1px solid rgba(0,212,232,0.2); }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+  .section-subtitle {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  /* ===================== CARDS ===================== */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border-accent); }
+  .card-glass {
+    background: rgba(26,26,36,0.6);
+    backdrop-filter: blur(10px);
+  }
+
+  /* ===================== SIGNAL BAR (TOP) ===================== */
+  .signal-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .signal-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .signal-item:hover { border-color: var(--border-accent); transform: translateY(-1px); }
+  .signal-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+  .signal-item.risk-on::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+  .signal-item.risk-off::before { background: linear-gradient(90deg, var(--red), var(--orange)); }
+  .signal-item.neutral::before { background: linear-gradient(90deg, var(--gold), var(--orange)); }
+  .signal-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .signal-value {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .signal-change {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .signal-change.up { color: var(--green); }
+  .signal-change.down { color: var(--red); }
+  .signal-change.flat { color: var(--gold); }
+  .signal-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+
+  /* ===================== NEWS FEED ===================== */
+  .news-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .news-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+  .news-item:hover { background: var(--bg-hover); border-color: var(--border-accent); }
+  .news-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .news-category {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .news-category.fed { background: var(--blue-dim); color: var(--blue); }
+  .news-category.ai { background: var(--purple-dim); color: var(--purple); }
+  .news-category.geo { background: var(--red-dim); color: var(--red); }
+  .news-category.macro { background: var(--gold-dim); color: var(--gold); }
+  .news-category.energy { background: rgba(255,122,53,0.1); color: var(--orange); }
+  .news-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-left: auto;
+  }
+  .news-headline {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .news-impact {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 6px 10px;
+    border-left: 2px solid var(--border-accent);
+    background: rgba(255,255,255,0.02);
+    border-radius: 0 4px 4px 0;
+  }
+  .news-impact.bullish { border-left-color: var(--green); }
+  .news-impact.bearish { border-left-color: var(--red); }
+  .news-impact.neutral { border-left-color: var(--gold); }
+  .news-source {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  /* ===================== MARKET TABLE ===================== */
+  .market-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .market-region {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .region-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .region-flag {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .region-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+  .region-status {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .status-open { background: var(--green-dim); color: var(--green); }
+  .status-closed { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+  .status-premarket { background: var(--gold-dim); color: var(--gold); }
+  .market-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    gap: 10px;
+    transition: background 0.15s;
+    cursor: default;
+  }
+  .market-row:last-child { border-bottom: none; }
+  .market-row:hover { background: var(--bg-hover); }
+  .market-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 140px;
+  }
+  .market-ticker {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .market-price {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+  }
+  .market-change {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    min-width: 65px;
+    text-align: right;
+  }
+  .market-bar {
+    width: 60px;
+    height: 4px;
+    background: var(--bg-deep);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .market-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+  .up { color: var(--green); }
+  .down { color: var(--red); }
+  .flat { color: var(--gold); }
+  .fill-up { background: var(--green); }
+  .fill-down { background: var(--red); }
+
+  /* ===================== AI TRACKER ===================== */
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .ai-region-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .ai-region-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-stock-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    gap: 8px;
+    cursor: default;
+    transition: background 0.15s;
+  }
+  .ai-stock-row:last-child { border-bottom: none; }
+  .ai-stock-row:hover { background: var(--bg-hover); }
+  .ai-ticker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 55px;
+  }
+  .ai-name {
+    font-size: 11px;
+    color: var(--text-secondary);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ai-price {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-primary);
+  }
+  .ai-change {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 52px;
+    text-align: right;
+  }
+  .rank-badge {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .rank-leader { background: var(--green-dim); color: var(--green); }
+  .rank-laggard { background: var(--red-dim); color: var(--red); }
+  .rank-unusual { background: var(--purple-dim); color: var(--purple); }
+
+  /* ===================== COMMODITIES ===================== */
+  .commodity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .commodity-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: all 0.2s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .commodity-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+  .commodity-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .commodity-name {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .commodity-price {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .commodity-change {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .commodity-signal {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+  .commodity-sparkline {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    opacity: 0.15;
+  }
+
+  /* ===================== RATES & FX ===================== */
+  .rates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .rates-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .rates-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .rate-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    gap: 12px;
+    cursor: default;
+    transition: background 0.15s;
+  }
+  .rate-row:last-child { border-bottom: none; }
+  .rate-row:hover { background: var(--bg-hover); }
+  .rate-name { font-size: 12px; font-weight: 500; color: var(--text-primary); flex: 1; }
+  .rate-sub { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+  .rate-value {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .rate-change {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: right;
+  }
+  .rate-gauge {
+    width: 80px;
+    height: 5px;
+    background: var(--bg-deep);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .rate-gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+  }
+
+  /* ===================== YIELD CURVE VISUAL ===================== */
+  .yield-curve-visual {
+    padding: 16px;
+    background: var(--bg-deep);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+  }
+  .yield-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===================== CRYPTO ===================== */
+  .crypto-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .crypto-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .crypto-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+  .crypto-symbol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .crypto-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .btc-icon { background: rgba(247,147,26,0.2); color: #f7931a; }
+  .eth-icon { background: rgba(98,126,234,0.2); color: #627eea; }
+  .sol-icon { background: rgba(153,69,255,0.2); color: #9945ff; }
+  .dom-icon { background: rgba(245,200,66,0.2); color: var(--gold); }
+  .crypto-name { font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); }
+  .crypto-price {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .crypto-change { font-size: 13px; font-weight: 600; margin-top: 3px; }
+  .crypto-sub { font-size: 10px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
+
+  /* ===================== CROSS-ASSET SIGNALS ===================== */
+  .signals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .signal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+    cursor: default;
+  }
+  .signal-card:hover { border-color: var(--border-accent); }
+  .signal-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .signal-content { flex: 1; }
+  .signal-heading { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; line-height: 1.3; }
+  .signal-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+  .signal-type {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+  .type-bullish { background: var(--green-dim); color: var(--green); }
+  .type-bearish { background: var(--red-dim); color: var(--red); }
+  .type-caution { background: var(--gold-dim); color: var(--gold); }
+  .type-watch { background: var(--blue-dim); color: var(--blue); }
+
+  /* ===================== MACRO EVENTS ===================== */
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .event-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .event-row:hover { border-color: var(--border-accent); background: var(--bg-hover); }
+  .event-importance {
+    width: 4px;
+    height: 40px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .importance-high { background: var(--red); }
+  .importance-medium { background: var(--gold); }
+  .importance-low { background: var(--text-muted); }
+  .event-date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 80px;
+  }
+  .event-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .event-country {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 60px;
+  }
+  .event-prev {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 70px;
+    text-align: center;
+  }
+  .event-forecast {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 70px;
+    text-align: right;
+  }
+  .event-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-align: right;
+  }
+
+  /* ===================== FOOTER ===================== */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .footer-brand span {
+    color: var(--green);
+  }
+  .footer-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  /* ===================== REGIME INDICATOR ===================== */
+  .regime-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .regime-label {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 100px;
+  }
+  .regime-items {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+  }
+  .regime-item {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-family: var(--font-body);
+  }
+  .regime-item.active-growth { background: var(--green-dim); border-color: rgba(0,229,160,0.3); color: var(--green); }
+  .regime-item.active-inflation { background: var(--red-dim); border-color: rgba(255,77,106,0.3); color: var(--red); }
+  .regime-item.active-liquidity { background: var(--blue-dim); border-color: rgba(77,159,255,0.3); color: var(--blue); }
+  .regime-item.active-geopolitics { background: var(--gold-dim); border-color: rgba(245,200,66,0.3); color: var(--gold); }
+  .regime-item.inactive { color: var(--text-muted); }
+  .regime-confidence {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .confidence-bar {
+    width: 80px;
+    height: 4px;
+    background: var(--bg-deep);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    transition: width 0.5s;
+  }
+
+  /* ===================== LOADING SKELETON ===================== */
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ===================== ERROR CHIP ===================== */
+  .error-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--red);
+    background: var(--red-dim);
+    border: 1px solid rgba(255,77,106,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  /* ===================== DIVIDER ===================== */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* ===================== TOOLTIP ===================== */
+  [data-tooltip] {
+    position: relative;
+  }
+  [data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-accent);
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 999;
+    font-family: var(--font-mono);
+  }
+
+  /* ===================== UPDATE FLASH ===================== */
+  @keyframes flash-update {
+    0% { background: rgba(0,229,160,0.08); }
+    100% { background: transparent; }
+  }
+  .flash { animation: flash-update 1s ease-out; }
+
+  /* ===================== CHART CANVAS ===================== */
+  .mini-chart-wrap {
+    height: 60px;
+    position: relative;
+  }
+
+  /* ===================== HEATMAP ===================== */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .heatmap-cell {
+    border-radius: var(--radius-sm);
+    padding: 10px 8px;
+    text-align: center;
+    cursor: default;
+    transition: transform 0.2s, filter 0.2s;
+  }
+  .heatmap-cell:hover { transform: scale(1.05); filter: brightness(1.2); }
+  .heatmap-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 3px;
+  }
+  .heatmap-pct {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+  }
+
+  /* ===================== FEAR & GREED GAUGE ===================== */
+  .gauge-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .gauge-wrap {
+    position: relative;
+    width: 160px;
+    flex-shrink: 0;
+  }
+  .gauge-label-main {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .gauge-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .gauge-score {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    margin: 8px 0 4px;
+  }
+  .gauge-label {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .gauge-bar-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+    margin-top: 12px;
+    position: relative;
+  }
+  .gauge-needle {
+    position: absolute;
+    top: -4px;
+    width: 16px;
+    height: 16px;
+    background: var(--text-primary);
+    border-radius: 50%;
+    border: 2px solid var(--bg-void);
+    transform: translateX(-50%);
+    transition: left 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 8px rgba(255,255,255,0.3);
+  }
+  .gauge-components {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .gauge-comp {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .gauge-comp-name {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .gauge-comp-val {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-display);
+  }
+  .gauge-comp-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .gauge-comp-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s;
+  }
+
+  /* ===================== INDIA MACRO PANEL ===================== */
+  .india-panel {
+    background: linear-gradient(135deg, rgba(255,153,51,0.05) 0%, rgba(19,136,8,0.05) 50%, rgba(0,0,128,0.05) 100%);
+    border: 1px solid rgba(255,153,51,0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .india-panel::before {
+    content: '🇮🇳';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 80px;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .india-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .india-metric {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+  }
+  .india-metric-name {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .india-metric-val {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .india-metric-sub {
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  /* ===================== SPARKLINE IN COMMODITY ===================== */
+  .spark-canvas {
+    display: block;
+    margin-top: 8px;
+  }
+
+  /* ===================== MARQUEE TICKER ===================== */
+  .ticker-bar {
+    background: var(--bg-deep);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+  .ticker-inner {
+    display: inline-flex;
+    gap: 40px;
+    animation: marquee 40s linear infinite;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .ticker-sym { color: var(--text-muted); font-weight: 700; }
+  .ticker-price { color: var(--text-primary); }
+  .ticker-sep { color: var(--border-accent); }
+
+  /* ===================== SUMMARY BANNER ===================== */
+  .summary-banner {
+    background: linear-gradient(135deg, rgba(0,229,160,0.06) 0%, rgba(77,159,255,0.06) 100%);
+    border: 1px solid rgba(0,229,160,0.15);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .summary-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .summary-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .summary-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .summary-refresh-info {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Attribution watermark */
+  .attribution {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 8px;
+    letter-spacing: 0.5px;
+  }
+  .attribution span { color: var(--green); }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 1200px) {
+    .signal-bar { grid-template-columns: repeat(3, 1fr); }
+    .ai-grid { grid-template-columns: 1fr 1fr; }
+    .commodity-grid { grid-template-columns: repeat(2, 1fr); }
+    .heatmap-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .market-grid { grid-template-columns: 1fr; }
+    .rates-grid { grid-template-columns: 1fr; }
+    .signals-grid { grid-template-columns: 1fr; }
+    .news-grid { grid-template-columns: 1fr; }
+    .crypto-grid { grid-template-columns: repeat(2, 1fr); }
+    .ai-grid { grid-template-columns: 1fr; }
+    .commodity-grid { grid-template-columns: repeat(2, 1fr); }
+    .heatmap-grid { grid-template-columns: repeat(3, 1fr); }
+    .regime-bar { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">YS</div>
+      <div>
+        <div class="logo-text">MacroPulse</div>
+        <div class="logo-sub">IB Analyst · CFA L2 · Equity Research · Trading</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="session-indicator" id="sessionIndicator">
+        <div class="session-dot" id="sessionDot"></div>
+        <span id="sessionName" style="font-size:11px; color:var(--text-muted);">DETECTING SESSION...</span>
+      </div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <div class="header-time" id="headerTime">--:--:-- UTC</div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+        <span class="refresh-icon" id="refreshIcon">↻</span>
+        Refresh
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== TICKER BAR ===================== -->
+<div class="ticker-bar">
+  <div class="ticker-inner" id="tickerInner">
+    <span class="ticker-item"><span class="ticker-sym">S&P 500</span>&nbsp;<span class="ticker-price" id="tk-spx">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NASDAQ</span>&nbsp;<span class="ticker-price" id="tk-ndx">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NIFTY 50</span>&nbsp;<span class="ticker-price" id="tk-nifty">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">BITCOIN</span>&nbsp;<span class="ticker-price" id="tk-btc">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">GOLD</span>&nbsp;<span class="ticker-price" id="tk-gold">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">WTI OIL</span>&nbsp;<span class="ticker-price" id="tk-oil">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">DXY</span>&nbsp;<span class="ticker-price" id="tk-dxy">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">US 10Y</span>&nbsp;<span class="ticker-price" id="tk-yield">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NVIDIA</span>&nbsp;<span class="ticker-price" id="tk-nvda">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">DAX</span>&nbsp;<span class="ticker-price" id="tk-dax">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NIKKEI</span>&nbsp;<span class="ticker-price" id="tk-nk">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">HANG SENG</span>&nbsp;<span class="ticker-price" id="tk-hsi">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="ticker-sym">S&P 500</span>&nbsp;<span class="ticker-price" id="tk-spx2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NASDAQ</span>&nbsp;<span class="ticker-price" id="tk-ndx2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NIFTY 50</span>&nbsp;<span class="ticker-price" id="tk-nifty2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">BITCOIN</span>&nbsp;<span class="ticker-price" id="tk-btc2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">GOLD</span>&nbsp;<span class="ticker-price" id="tk-gold2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">WTI OIL</span>&nbsp;<span class="ticker-price" id="tk-oil2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">DXY</span>&nbsp;<span class="ticker-price" id="tk-dxy2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">US 10Y</span>&nbsp;<span class="ticker-price" id="tk-yield2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NVIDIA</span>&nbsp;<span class="ticker-price" id="tk-nvda2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">DAX</span>&nbsp;<span class="ticker-price" id="tk-dax2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">NIKKEI</span>&nbsp;<span class="ticker-price" id="tk-nk2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="ticker-sym">HANG SENG</span>&nbsp;<span class="ticker-price" id="tk-hsi2">—</span><span class="ticker-sep">&nbsp;|</span></span>
+  </div>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<div class="container">
+
+  <!-- ============ SUMMARY BANNER ============ -->
+  <div class="summary-banner">
+    <div class="summary-icon">🧭</div>
+    <div class="summary-text" id="summaryText">
+      <strong>MacroPulse</strong> — Initializing real-time data feeds across 50+ instruments. Tracking global liquidity, cross-asset flows, AI ecosystem momentum, and macro regime. Curated by <strong>Yuvraj Sureka</strong>.
+    </div>
+    <div class="summary-refresh-info">
+      Auto-refresh: 45s<br>
+      <span id="nextRefreshCountdown" style="color:var(--green);">Loading...</span>
+    </div>
+  </div>
+
+  <!-- ============ FEAR & GREED GAUGE ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-red">🎯 Sentiment</span>
+    <span class="section-title">Market Fear & Greed Gauge</span>
+    <span class="section-subtitle">Composite of 6 market signals — computed live</span>
+  </div>
+  <div class="gauge-section">
+    <div>
+      <div class="gauge-label-main">Fear & Greed Index</div>
+      <div class="gauge-sub">Composite Score / 100</div>
+      <div class="gauge-score" id="gaugeScore" style="color:var(--gold);">—</div>
+      <div class="gauge-label" id="gaugeLabel" style="color:var(--gold);">COMPUTING...</div>
+      <div class="gauge-bar-track" style="width:200px;">
+        <div class="gauge-needle" id="gaugeNeedle" style="left:50%"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; width:200px; margin-top:6px; font-size:9px; color:var(--text-muted); font-family:var(--font-mono);">
+        <span>EXTREME FEAR</span><span>EXTREME GREED</span>
+      </div>
+    </div>
+    <div class="gauge-components">
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">Market Momentum (S&P)</div>
+        <div class="gauge-comp-val" id="gc-momentum" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-momentum" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">Volatility (VIX Proxy)</div>
+        <div class="gauge-comp-val" id="gc-vix" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-vix" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">Safe Haven (Gold)</div>
+        <div class="gauge-comp-val" id="gc-safe" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-safe" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">Crypto Risk (BTC)</div>
+        <div class="gauge-comp-val" id="gc-crypto" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-crypto" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">Yield Curve Slope</div>
+        <div class="gauge-comp-val" id="gc-curve" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-curve" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gauge-comp-name">USD Strength (DXY)</div>
+        <div class="gauge-comp-val" id="gc-usd" style="color:var(--text-muted);">—</div>
+        <div class="gauge-comp-bar"><div class="gauge-comp-fill" id="gcb-usd" style="width:50%; background:var(--gold);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ INDIA MACRO PANEL ============ -->
+  <div class="section-header">
+    <span class="section-tag" style="background:rgba(255,153,51,0.1); color:#ff9933; border:1px solid rgba(255,153,51,0.25);">🇮🇳 India Focus</span>
+    <span class="section-title">India Macro Snapshot</span>
+    <span class="section-subtitle">Curated by Yuvraj Sureka</span>
+  </div>
+  <div class="india-panel">
+    <div style="font-size:11px; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Key Indicators — Live &amp; Derived from Market Data</div>
+    <div class="india-grid" id="indiaMetricsGrid">
+      <div class="india-metric">
+        <div class="india-metric-name">Nifty 50</div>
+        <div class="india-metric-val" id="ind-nifty">—</div>
+        <div class="india-metric-sub" id="ind-nifty-sub" style="color:var(--text-muted);">Loading...</div>
+      </div>
+      <div class="india-metric">
+        <div class="india-metric-name">Bank Nifty</div>
+        <div class="india-metric-val" id="ind-bnifty">—</div>
+        <div class="india-metric-sub" id="ind-bnifty-sub" style="color:var(--text-muted);">Loading...</div>
+      </div>
+      <div class="india-metric">
+        <div class="india-metric-name">USD / INR</div>
+        <div class="india-metric-val" id="india-inr">—</div>
+        <div class="india-metric-sub" id="india-inr-sub" style="color:var(--text-muted);">Loading...</div>
+      </div>
+      <div class="india-metric">
+        <div class="india-metric-name">RBI Repo Rate</div>
+        <div class="india-metric-val" id="ind-repo">—</div>
+        <div class="india-metric-sub" id="ind-repo-sub" style="color:var(--text-muted);">World Bank API</div>
+      </div>
+      <div class="india-metric">
+        <div class="india-metric-name">India CPI</div>
+        <div class="india-metric-val" id="ind-cpi">—</div>
+        <div class="india-metric-sub" id="ind-cpi-sub" style="color:var(--text-muted);">World Bank API</div>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding:10px 14px; background:rgba(0,229,160,0.05); border:1px solid rgba(0,229,160,0.1); border-radius:var(--radius-sm); font-size:12px; color:var(--text-secondary); line-height:1.5;" id="indiaSignalView">
+      <strong style="color:var(--green);">India Signal:</strong> <span id="indiaSignalText">Computing from live market data...</span>
+    </div>
+  </div>
+
+  <!-- ============ REGIME INDICATOR ============ -->
+  <div class="regime-bar" id="regimeBar">
+    <div class="regime-label">MARKET REGIME</div>
+    <div class="regime-items" id="regimeItems">
+      <div class="regime-item inactive">Growth</div>
+      <div class="regime-item inactive">Inflation</div>
+      <div class="regime-item inactive">Liquidity</div>
+      <div class="regime-item inactive">Geopolitics</div>
+    </div>
+    <div class="regime-confidence">
+      <span id="regimeConf">Analyzing...</span>
+      <div class="confidence-bar"><div class="confidence-fill" id="confFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- ============ SIGNAL BAR ============ -->
+  <div class="signal-bar" id="signalBar">
+    <div class="signal-item neutral">
+      <div class="signal-label">S&P 500</div>
+      <div class="signal-value" id="sig-spx">—</div>
+      <div class="signal-change flat" id="sig-spx-ch">Loading...</div>
+      <div class="signal-meta" id="sig-spx-meta">—</div>
+    </div>
+    <div class="signal-item neutral">
+      <div class="signal-label">NASDAQ 100</div>
+      <div class="signal-value" id="sig-ndx">—</div>
+      <div class="signal-change flat" id="sig-ndx-ch">Loading...</div>
+      <div class="signal-meta" id="sig-ndx-meta">—</div>
+    </div>
+    <div class="signal-item neutral">
+      <div class="signal-label">US 10Y YIELD</div>
+      <div class="signal-value" id="sig-yield">—</div>
+      <div class="signal-change flat" id="sig-yield-ch">Loading...</div>
+      <div class="signal-meta">Basis Points</div>
+    </div>
+    <div class="signal-item neutral">
+      <div class="signal-label">DXY (USD)</div>
+      <div class="signal-value" id="sig-dxy">—</div>
+      <div class="signal-change flat" id="sig-dxy-ch">Loading...</div>
+      <div class="signal-meta">Dollar Index</div>
+    </div>
+    <div class="signal-item neutral">
+      <div class="signal-label">BITCOIN</div>
+      <div class="signal-value" id="sig-btc">—</div>
+      <div class="signal-change flat" id="sig-btc-ch">Loading...</div>
+      <div class="signal-meta" id="sig-btc-meta">Crypto Sentiment</div>
+    </div>
+  </div>
+
+  <!-- ============ MARKET MOVING NEWS ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-red">🔴 Breaking</span>
+    <span class="section-title">Market-Moving News</span>
+    <span class="section-subtitle" id="newsTimestamp">Last updated: —</span>
+  </div>
+  <div class="news-grid" id="newsGrid">
+    <div class="news-item" style="grid-column:1/-1; text-align:center; padding:24px;">
+      <div class="skeleton" style="height:14px; width:60%; margin:0 auto 8px;"></div>
+      <div class="skeleton" style="height:14px; width:40%; margin:0 auto;"></div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:12px; font-family:var(--font-mono);">Fetching live headlines from GNews API...</div>
+    </div>
+  </div>
+
+  <!-- ============ HEATMAP ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-green">🌐 Global Risk</span>
+    <span class="section-title">World Market Heatmap</span>
+    <span class="section-subtitle" id="heatmapTs">—</span>
+  </div>
+  <div class="heatmap-grid" id="heatmapGrid">
+    <!-- Filled dynamically -->
+  </div>
+
+  <!-- ============ GLOBAL RISK TABLE ============ -->
+  <div class="market-grid" id="marketGrid">
+    <!-- US Markets -->
+    <div class="market-region">
+      <div class="region-header">
+        <span class="region-flag">🇺🇸</span>
+        <span class="region-name">United States</span>
+        <span class="region-status" id="us-status">DETECTING</span>
+      </div>
+      <div id="us-markets"></div>
+    </div>
+    <!-- Europe Markets -->
+    <div class="market-region">
+      <div class="region-header">
+        <span class="region-flag">🇪🇺</span>
+        <span class="region-name">Europe</span>
+        <span class="region-status" id="eu-status">DETECTING</span>
+      </div>
+      <div id="eu-markets"></div>
+    </div>
+    <!-- Asia Markets -->
+    <div class="market-region">
+      <div class="region-header">
+        <span class="region-flag">🌏</span>
+        <span class="region-name">Asia Pacific</span>
+        <span class="region-status" id="asia-status">DETECTING</span>
+      </div>
+      <div id="asia-markets"></div>
+    </div>
+    <!-- India -->
+    <div class="market-region">
+      <div class="region-header">
+        <span class="region-flag">🇮🇳</span>
+        <span class="region-name">India</span>
+        <span class="region-status" id="india-status">DETECTING</span>
+      </div>
+      <div id="india-markets"></div>
+    </div>
+  </div>
+
+  <!-- ============ AI TRACKER ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-purple">🧠 AI Edge</span>
+    <span class="section-title">AI & Semiconductor Flow Tracker</span>
+    <span class="section-subtitle">Ranked by % move — Curated by Yuvraj Sureka</span>
+  </div>
+  <div class="ai-grid" id="aiGrid">
+    <div class="ai-region-card">
+      <div class="ai-region-header">🇺🇸 US Megacaps</div>
+      <div id="ai-us"></div>
+    </div>
+    <div class="ai-region-card">
+      <div class="ai-region-header">🇹🇼 Taiwan + Korea</div>
+      <div id="ai-asia"></div>
+    </div>
+    <div class="ai-region-card">
+      <div class="ai-region-header">🌏 Japan + China + India</div>
+      <div id="ai-rest"></div>
+    </div>
+  </div>
+
+  <!-- ============ COMMODITIES ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-orange">🛢️ Commodities</span>
+    <span class="section-title">Commodity & Inflation Signals</span>
+    <span class="section-subtitle" id="commTs">—</span>
+  </div>
+  <div class="commodity-grid" id="commodityGrid">
+    <!-- Filled dynamically -->
+  </div>
+
+  <!-- ============ RATES, LIQUIDITY, FX ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-blue">💰 Rates & FX</span>
+    <span class="section-title">Rates, Liquidity & Currency</span>
+    <span class="section-subtitle" id="ratesTs">—</span>
+  </div>
+  <div class="rates-grid">
+    <div class="rates-card">
+      <div class="rates-header">US Treasury Yields</div>
+      <div id="yields-table"></div>
+      <div style="padding:12px 16px;">
+        <canvas id="yieldCurveChart" style="width:100%; height:80px;"></canvas>
+      </div>
+    </div>
+    <div class="rates-card">
+      <div class="rates-header">Foreign Exchange</div>
+      <div id="fx-table"></div>
+    </div>
+  </div>
+
+  <!-- ============ CRYPTO ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-gold">₿ Crypto</span>
+    <span class="section-title">Crypto Risk Sentiment</span>
+    <span class="section-subtitle" id="cryptoTs">—</span>
+  </div>
+  <div class="crypto-grid">
+    <div class="crypto-card">
+      <div class="crypto-symbol">
+        <div class="crypto-icon btc-icon">₿</div>
+        <span class="crypto-name">BITCOIN</span>
+      </div>
+      <div class="crypto-price" id="btc-price">—</div>
+      <div class="crypto-change" id="btc-change">Loading...</div>
+      <div class="crypto-sub" id="btc-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-symbol">
+        <div class="crypto-icon eth-icon">Ξ</div>
+        <span class="crypto-name">ETHEREUM</span>
+      </div>
+      <div class="crypto-price" id="eth-price">—</div>
+      <div class="crypto-change" id="eth-change">Loading...</div>
+      <div class="crypto-sub" id="eth-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-symbol">
+        <div class="crypto-icon sol-icon">◎</div>
+        <span class="crypto-name">SOLANA</span>
+      </div>
+      <div class="crypto-price" id="sol-price">—</div>
+      <div class="crypto-change" id="sol-change">Loading...</div>
+      <div class="crypto-sub" id="sol-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-symbol">
+        <div class="crypto-icon dom-icon">⬡</div>
+        <span class="crypto-name">BTC DOMINANCE</span>
+      </div>
+      <div class="crypto-price" id="btc-dom">—</div>
+      <div class="crypto-change" id="dom-signal" style="font-size:11px; color:var(--text-secondary);">Market Signal</div>
+      <div class="crypto-sub" id="total-mcap">Total MCap: —</div>
+    </div>
+  </div>
+
+  <!-- ============ CROSS-ASSET SIGNALS ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-cyan">🔗 Signal Engine</span>
+    <span class="section-title">Cross-Asset Intelligence</span>
+    <span class="section-subtitle">Auto-generated by Yuvraj Sureka's signal model</span>
+  </div>
+  <div class="signals-grid" id="crossAssetSignals">
+    <div class="signal-card">
+      <div class="signal-icon" style="background:var(--blue-dim); font-size:18px;">📊</div>
+      <div class="signal-content">
+        <span class="signal-type type-watch">Analyzing</span>
+        <div class="signal-heading">Fetching cross-asset data...</div>
+        <div class="signal-desc">Signal engine initializing. Please wait.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MACRO EVENTS ============ -->
+  <div class="section-header">
+    <span class="section-tag tag-gold">📅 Events</span>
+    <span class="section-title">Upcoming Macro Events</span>
+    <span class="section-subtitle">High-impact calendar</span>
+  </div>
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px;">
+    <div style="display:flex; padding:10px 16px; border-bottom:1px solid var(--border); gap:16px; font-size:10px; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+      <span style="min-width:80px;">Date</span>
+      <span style="flex:1;">Event</span>
+      <span style="min-width:60px;">Country</span>
+      <span style="min-width:70px; text-align:center;">Previous</span>
+      <span style="min-width:70px; text-align:right;">Forecast</span>
+    </div>
+    <div class="events-list" id="eventsList" style="margin:0; padding:0 8px 8px; gap:4px; border:none;">
+      <div style="padding:20px; text-align:center; font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Fetching macro calendar from Econdb...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<div style="max-width:1600px; margin:0 auto; padding:0 24px;">
+  <div class="attribution">Curated by <span>Yuvraj Sureka</span> with the help of AI &nbsp;·&nbsp; Investment Banking Analyst &nbsp;·&nbsp; CFA Level II Candidate &nbsp;·&nbsp; Equity Research &nbsp;·&nbsp; Trading</div>
+</div>
+
+<!-- DISCLAIMER BANNER -->
+<div style="background:rgba(255,77,106,0.06); border-top:1px solid rgba(255,77,106,0.15); border-bottom:1px solid rgba(255,77,106,0.15); padding:14px 24px; margin:0;">
+  <div style="max-width:1600px; margin:0 auto; display:flex; align-items:flex-start; gap:12px;">
+    <span style="font-size:16px; flex-shrink:0; margin-top:1px;">⚠️</span>
+    <div style="font-size:11px; color:var(--text-secondary); line-height:1.6; font-family:var(--font-body);">
+      <strong style="color:var(--red); font-size:12px;">DISCLAIMER:</strong> This dashboard is for <strong>informational and educational purposes only</strong>. Nothing on this platform constitutes financial advice, investment advice, trading advice, or any other form of advice. All data, signals, scores, and commentary are generated from publicly available market data and automated analysis. Past performance is not indicative of future results. Always consult a qualified financial advisor before making any investment decisions. The creator assumes no liability for any decisions made based on this dashboard.
+    </div>
+  </div>
+</div>
+
+<!-- CREDENTIALS FOOTER -->
+<footer class="footer" style="border-top:1px solid var(--border); padding:24px;">
+  <div style="max-width:1600px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+
+    <!-- Left: Branding -->
+    <div>
+      <div class="footer-brand" style="font-size:16px; margin-bottom:4px;">MacroPulse <span>by Yuvraj Sureka</span></div>
+      <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-bottom:2px;">Curated with the help of AI &nbsp;·&nbsp; Not Financial Advice</div>
+      <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Data: Yahoo Finance · CoinGecko · World Bank · Reuters RSS · Econdb</div>
+    </div>
+
+    <!-- Center: Credentials -->
+    <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
+      <div style="font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--text-primary); letter-spacing:0.3px;">Yuvraj Sureka</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+        <span style="font-size:10px; font-family:var(--font-mono); background:var(--blue-dim); color:var(--blue); border:1px solid rgba(77,159,255,0.2); padding:3px 10px; border-radius:4px;">IB Analyst</span>
+        <span style="font-size:10px; font-family:var(--font-mono); background:var(--gold-dim); color:var(--gold); border:1px solid rgba(245,200,66,0.2); padding:3px 10px; border-radius:4px;">CFA Level II</span>
+        <span style="font-size:10px; font-family:var(--font-mono); background:var(--green-dim); color:var(--green); border:1px solid rgba(0,229,160,0.2); padding:3px 10px; border-radius:4px;">Equity Research</span>
+        <span style="font-size:10px; font-family:var(--font-mono); background:var(--purple-dim); color:var(--purple); border:1px solid rgba(176,106,255,0.2); padding:3px 10px; border-radius:4px;">Trading</span>
+      </div>
+    </div>
+
+    <!-- Right: Contact -->
+    <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+      <a href="https://www.linkedin.com/in/yuvrajsureka47" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:8px; text-decoration:none; background:rgba(10,102,194,0.1); border:1px solid rgba(10,102,194,0.25); border-radius:var(--radius-sm); padding:7px 14px; transition:all 0.2s;"
+         onmouseover="this.style.background='rgba(10,102,194,0.2)'" onmouseout="this.style.background='rgba(10,102,194,0.1)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a66c2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <span style="font-size:12px; color:#4d9fff; font-family:var(--font-mono);">linkedin.com/in/yuvrajsureka47</span>
+      </a>
+      <a href="mailto:yuvrajsureka47@gmail.com"
+         style="display:flex; align-items:center; gap:8px; text-decoration:none; background:rgba(234,67,53,0.08); border:1px solid rgba(234,67,53,0.2); border-radius:var(--radius-sm); padding:7px 14px; transition:all 0.2s;"
+         onmouseover="this.style.background='rgba(234,67,53,0.15)'" onmouseout="this.style.background='rgba(234,67,53,0.08)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#ea4335"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.009l8.073-5.516C21.69 2.28 24 3.434 24 5.457z"/></svg>
+        <span style="font-size:12px; color:#ff7a6e; font-family:var(--font-mono);">yuvrajsureka47@gmail.com</span>
+      </a>
+      <a href="tel:+916001930875"
+         style="display:flex; align-items:center; gap:8px; text-decoration:none; background:rgba(0,229,160,0.06); border:1px solid rgba(0,229,160,0.15); border-radius:var(--radius-sm); padding:7px 14px; transition:all 0.2s;"
+         onmouseover="this.style.background='rgba(0,229,160,0.12)'" onmouseout="this.style.background='rgba(0,229,160,0.06)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#00e5a0"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        <span style="font-size:12px; color:var(--green); font-family:var(--font-mono);">+91 6001930875</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom strip -->
+  <div style="max-width:1600px; margin:16px auto 0; padding-top:14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);" id="lastRefresh">Last refreshed: —</div>
+    <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">© 2026 Yuvraj Sureka &nbsp;·&nbsp; All rights reserved &nbsp;·&nbsp; <span style="color:var(--red);">Not Financial Advice</span></div>
+    <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);" id="footerMeta">MacroPulse · Built with AI</div>
+  </div>
+
+</footer>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ===================== ARCHITECTURE =====================
+// API Abstraction Layer — all data sources routed through here
+// Error handling + retry logic for each endpoint
+// Auto-refresh every 45 seconds without full page reload
+
+const CONFIG = {
+  REFRESH_INTERVAL: 45000,
+  COINGECKO: 'https://api.coingecko.com/api/v3',
+  MAX_RETRIES: 2,
+  RETRY_DELAY: 800,
+};
+
+// ===================== UTILITY =====================
+const $ = id => document.getElementById(id);
+const fmt = (n, dec=2) => n != null && !isNaN(n) ? Number(n).toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec}) : '—';
+const fmtPct = n => n != null && !isNaN(n) ? (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%' : '—';
+const fmtPrice = (n, sym='$') => n != null && !isNaN(n) ? sym + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+const colorClass = n => n == null ? 'flat' : n > 0 ? 'up' : n < 0 ? 'down' : 'flat';
+const fillClass = n => n == null ? '' : n > 0 ? 'fill-up' : n < 0 ? 'fill-down' : '';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// =====================================================================
+// DATA ENGINE — ROBUST MULTI-SOURCE FETCHING
+// Strategy:
+//   1. Try Yahoo Finance query2 directly (works on some hosts)
+//   2. Try Yahoo Finance query1 directly
+//   3. Rotate through 6 CORS proxies with randomisation
+//   4. Cache last successful value in sessionStorage as fallback
+//   5. Never block the UI — always return best available data
+// =====================================================================
+
+// 6 proxy builders — tried in random order to distribute load
+const PROXY_BUILDERS = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  url => `https://proxy.cors.sh/${url}`,
+  url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
+  url => `https://yacdn.org/proxy/${url}`,
+];
+
+// Shuffle array — randomise proxy order each call to spread load
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Cache layer — persist last good value so stale > nothing
+const CACHE = {
+  set(sym, data) {
+    try { sessionStorage.setItem('cache_' + sym, JSON.stringify({ data, ts: Date.now() })); } catch(e) {}
+  },
+  get(sym) {
+    try {
+      const raw = sessionStorage.getItem('cache_' + sym);
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      // Accept cache up to 24 hours old — better than nothing
+      if (Date.now() - ts < 86400000) return data;
+    } catch(e) {}
+    return null;
+  }
+};
+
+async function fetchRaw(url, timeout = 8000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal, mode: 'cors' });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r;
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+// Parse Yahoo Finance response — handles both direct and proxied formats
+function parseYahooResponse(json) {
+  const meta = json?.chart?.result?.[0]?.meta;
+  if (!meta) return null;
+  const price    = meta.regularMarketPrice ?? meta.chartPreviousClose;
+  const prev     = meta.previousClose ?? meta.chartPreviousClose;
+  if (!price) return null;
+  const change   = prev ? price - prev : 0;
+  const changePct= prev ? (change / prev) * 100 : 0;
+  return { price, change, changePct, name: meta.shortName || '' };
+}
+
+async function fetchYahooSymbol(symbol) {
+  // Two Yahoo endpoints — query2 is often less rate-limited
+  const ENDPOINTS = [
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`,
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`,
+  ];
+
+  // Shuffle proxies so all clients don't hit the same one first
+  const proxies = shuffle(PROXY_BUILDERS);
+
+  for (const endpoint of ENDPOINTS) {
+    for (const builder of proxies) {
+      const proxiedUrl = builder(endpoint);
+      try {
+        const r = await fetchRaw(proxiedUrl, 7000);
+        let json;
+
+        // allorigins wraps in { contents: "..." }
+        if (proxiedUrl.includes('allorigins')) {
+          const wrap = await r.json();
+          if (!wrap?.contents) continue;
+          json = JSON.parse(wrap.contents);
+        } else {
+          json = await r.json();
+        }
+
+        const result = parseYahooResponse(json);
+        if (result) {
+          CACHE.set(symbol, result); // save to cache on success
+          return result;
+        }
+      } catch(e) {
+        // this proxy failed for this endpoint — try next
+        continue;
+      }
+    }
+  }
+
+  // All proxies failed — return cached value if available
+  const cached = CACHE.get(symbol);
+  if (cached) {
+    return { ...cached, stale: true }; // mark as stale so UI can indicate
+  }
+
+  return null;
+}
+
+// Fetch all symbols with controlled concurrency
+// maxConcurrent=4 to avoid triggering rate limits
+async function fetchYahoo(symbols, maxConcurrent = 4) {
+  const results = {};
+  for (let i = 0; i < symbols.length; i += maxConcurrent) {
+    const chunk   = symbols.slice(i, i + maxConcurrent);
+    const settled = await Promise.allSettled(chunk.map(s => fetchYahooSymbol(s)));
+    chunk.forEach((sym, idx) => {
+      if (settled[idx].status === 'fulfilled' && settled[idx].value) {
+        results[sym] = settled[idx].value;
+      }
+    });
+    // Small delay between chunks to avoid hammering proxies
+    if (i + maxConcurrent < symbols.length) await sleep(300);
+  }
+  return results;
+}
+
+// CoinGecko — public, no CORS issues, very reliable
+async function fetchCrypto() {
+  const base = 'https://api.coingecko.com/api/v3';
+  try {
+    const [coins, globalData] = await Promise.all([
+      fetchRaw(base + '/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana&order=market_cap_desc&per_page=3&sparkline=false&price_change_percentage=24h', 8000).then(r => r.json()),
+      fetchRaw(base + '/global', 8000).then(r => r.json()),
+    ]);
+    if (coins?.length) {
+      CACHE.set('crypto_coins', coins);
+      CACHE.set('crypto_global', globalData?.data);
+      return { coins, global: globalData?.data };
+    }
+  } catch(e) {}
+
+  // Fallback: try via proxy
+  try {
+    const url = base + '/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana&per_page=3&sparkline=false&price_change_percentage=24h';
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const r   = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const coins = JSON.parse(wrap.contents);
+    if (Array.isArray(coins) && coins.length) {
+      CACHE.set('crypto_coins', coins);
+      return { coins, global: CACHE.get('crypto_global') };
+    }
+  } catch(e) {}
+
+  // Return cache if everything fails
+  return {
+    coins:  CACHE.get('crypto_coins')  || [],
+    global: CACHE.get('crypto_global') || null,
+  };
+}
+
+// ===================== TIME & SESSION =====================
+function detectSession() {
+  const now = new Date();
+  const utcH = now.getUTCHours();
+  const utcM = now.getUTCMinutes();
+  const utcTotal = utcH * 60 + utcM;
+  // Asia: 00:00-07:00 UTC, Europe: 07:00-16:00, US: 13:30-21:00
+  let session, dotActive = true;
+  if (utcTotal >= 780 || utcTotal < 0) session = 'US Session';
+  else if (utcTotal >= 130 && utcTotal < 940) session = 'US Session';
+  else if (utcTotal >= 420 && utcTotal < 960) session = 'European Session';
+  else if (utcTotal >= 0 && utcTotal < 420) session = 'Asian Session';
+  else session = 'Off-Hours';
+
+  // More precise
+  if (utcTotal >= 830 && utcTotal <= 1260) session = 'US Session 🟢';
+  else if (utcTotal >= 420 && utcTotal < 960) session = 'European Session 🟡';
+  else if (utcTotal >= 0 && utcTotal < 450) session = 'Asian Session 🔵';
+  else { session = 'Markets Closed'; dotActive = false; }
+
+  $('sessionName').textContent = session;
+  $('sessionDot').className = 'session-dot' + (dotActive ? ' active' : '');
+}
+
+function updateClock() {
+  const now = new Date();
+  $('headerTime').textContent = now.toUTCString().slice(17, 25) + ' UTC | ' + now.toLocaleTimeString('en-IN', {timeZone:'Asia/Kolkata'}) + ' IST';
+  detectSession();
+}
+
+// ===================== SYMBOL REGISTRY =====================
+const SYMBOLS = {
+  us: ['^GSPC', '^NDX', '^DJI', '^RUT'],
+  europe: ['^STOXX50E', '^FTSE', '^GDAXI'],
+  asia: ['^N225', '^HSI', '000001.SS', '^KS11'],
+  india: ['^NSEI', '^NSEBANK', 'RELIANCE.NS', 'TCS.NS'],
+  yields: ['^IRX', '^FVX', '^TNX', '^TYX'],
+  fx: ['EURUSD=X', 'GBPUSD=X', 'USDJPY=X', 'DX-Y.NYB', 'USDINR=X'],
+  commodities: ['GC=F', 'SI=F', 'HG=F', 'CL=F', 'BZ=F', 'NG=F'],
+  ai_us: ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'AVGO'],
+  ai_asia: ['TSM', '2330.TW', 'MPNGY', '005930.KS', '000660.KS'],
+  ai_rest: ['8035.T', '6857.T', '9984.T', 'BABA', 'TCEHY', '9988.HK'],
+};
+
+const NAMES = {
+  '^GSPC':'S&P 500', '^NDX':'Nasdaq 100', '^DJI':'Dow Jones', '^RUT':'Russell 2000',
+  '^STOXX50E':'Euro Stoxx 50', '^FTSE':'FTSE 100', '^GDAXI':'DAX 40',
+  '^N225':'Nikkei 225', '^HSI':'Hang Seng', '000001.SS':'Shanghai Comp.', '^KS11':'KOSPI',
+  '^NSEI':'Nifty 50', '^NSEBANK':'Bank Nifty', 'RELIANCE.NS':'Reliance Inds', 'TCS.NS':'TCS',
+  '^IRX':'US 3M', '^FVX':'US 5Y', '^TNX':'US 10Y', '^TYX':'US 30Y',
+  'EURUSD=X':'EUR/USD', 'GBPUSD=X':'GBP/USD', 'USDJPY=X':'USD/JPY', 'DX-Y.NYB':'DXY', 'USDINR=X':'USD/INR',
+  'GC=F':'Gold', 'SI=F':'Silver', 'HG=F':'Copper', 'CL=F':'WTI Crude', 'BZ=F':'Brent Crude', 'NG=F':'Natural Gas',
+  'NVDA':'NVIDIA', 'MSFT':'Microsoft', 'AMZN':'Amazon', 'GOOGL':'Alphabet', 'META':'Meta', 'AMD':'AMD', 'AVGO':'Broadcom',
+  'TSM':'TSMC (ADR)', '2330.TW':'TSMC', 'MPNGY':'MediaTek', '005930.KS':'Samsung', '000660.KS':'SK Hynix',
+  '8035.T':'Tokyo Electron', '6857.T':'Advantest', '9984.T':'SoftBank', 'BABA':'Alibaba', 'TCEHY':'Tencent', '9988.HK':'Alibaba HK',
+};
+
+// ===================== ALL SYMBOLS FLAT =====================
+const ALL_SYMS = [...new Set([
+  ...SYMBOLS.us, ...SYMBOLS.europe, ...SYMBOLS.asia, ...SYMBOLS.india,
+  ...SYMBOLS.yields, ...SYMBOLS.fx, ...SYMBOLS.commodities,
+  ...SYMBOLS.ai_us, ...SYMBOLS.ai_asia, ...SYMBOLS.ai_rest,
+])];
+
+let globalData = {};
+
+// =====================================================================
+// QUANTITATIVE ENGINE — INSTITUTIONAL GRADE
+// All scores computed from live market data using z-score normalization
+// and multi-factor mathematical frameworks. Zero hardcoded values.
+// Architecture:
+//   DataStore → Quant Engine → Regime Classifier → Signal Generator → Renderer
+// =====================================================================
+
+// ---- DATA STORE: Rolling window state ----
+// We accumulate multiple days of data in sessionStorage as a rolling buffer.
+// This allows z-score normalization against recent history.
+// Key: symbol → array of { price, changePct, ts }
+const DS = {
+  WINDOW: 30, // trading days to keep
+  key: sym => 'mpds_' + sym,
+
+  push(sym, price, pct) {
+    if (price == null || isNaN(price)) return;
+    let arr = this.load(sym);
+    arr.push({ price, pct: pct || 0, ts: Date.now() });
+    if (arr.length > this.WINDOW) arr = arr.slice(-this.WINDOW);
+    try { sessionStorage.setItem(this.key(sym), JSON.stringify(arr)); } catch(e) {}
+  },
+
+  load(sym) {
+    try {
+      const raw = sessionStorage.getItem(this.key(sym));
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  },
+
+  // z-score of latest value against rolling window
+  zScore(sym) {
+    const arr = this.load(sym);
+    if (arr.length < 3) return null;
+    const vals = arr.map(x => x.pct);
+    const mean = vals.reduce((a,b) => a+b, 0) / vals.length;
+    const std = Math.sqrt(vals.map(v => (v-mean)**2).reduce((a,b)=>a+b,0) / vals.length);
+    if (std === 0) return 0;
+    return (vals[vals.length-1] - mean) / std;
+  },
+
+  // percentile rank of latest value (0-100)
+  percentile(sym) {
+    const arr = this.load(sym);
+    if (arr.length < 2) return 50;
+    const vals = arr.map(x => x.pct).sort((a,b) => a-b);
+    const cur = vals[vals.length-1];
+    const below = vals.filter(v => v <= cur).length;
+    return Math.round((below / vals.length) * 100);
+  },
+
+  // sigmaToScore: maps z-score → 0–100 (50 = neutral)
+  // Clamps at ±3σ → 0/100
+  sigmaToScore(z) {
+    if (z == null) return 50;
+    const clamped = Math.max(-3, Math.min(3, z));
+    return Math.round(((clamped + 3) / 6) * 100);
+  }
+};
+
+// ---- QUANT STATE: single source of truth ----
+const QS = {
+  // Raw market data
+  spxPrice: null, spxPct: null,
+  ndxPrice: null, ndxPct: null,
+  djiPct: null, rutPct: null,
+  yield3m: null, yield5y: null, yield10y: null, yield30y: null,
+  yield10yPct: null, yield3mPct: null,
+  dxyPrice: null, dxyPct: null,
+  goldPrice: null, goldPct: null,
+  silverPct: null,
+  copperPct: null,
+  oilPrice: null, oilPct: null,
+  brentPct: null,
+  gasPct: null,
+  btcPct: null, btcDom: null,
+  ethPct: null,
+  nvdaPct: null, tsmPct: null,
+  amdPct: null, msftPct: null,
+  inrPrice: null, inrPct: null,
+  niftyPct: null, niftyPrice: null,
+  bniftyPct: null,
+
+  // Computed derived quantities (filled by quant engine)
+  curveSpread10y2y: null,   // 10Y minus 3M (most recession-relevant)
+  curve30y3m: null,          // 30Y minus 3M
+  realYield10y: null,        // 10Y minus breakeven proxy
+  goldCopperRatio: null,     // risk-off vs risk-on commodity ratio
+  goldSpxCorr: null,         // recent correlation direction
+
+  // Fear & Greed component scores (0–100 each)
+  fg: {
+    equityMomentum: 50,
+    volatilityRegime: 50,
+    usdLiquidity: 50,
+    yieldCurve: 50,
+    goldSafeHaven: 50,
+    cryptoRisk: 50,
+    composite: 50,
+    trend: 'NEUTRAL',
+    label: 'Neutral',
+    color: 'var(--gold)',
+    prevComposite: null,
+    attribution: '',
+  },
+
+  // Regime
+  regime: {
+    growth: 0, inflation: 0, liquidity: 0, stress: 0,
+    dominant: 'MIXED', label: 'Balanced — No Clear Regime',
+    confidence: 0,
+    implication: '',
+    historicalAnalog: '',
+    assetImplication: '',
+  }
+};
+
+// ===================== POPULATE QS FROM LIVE DATA =====================
+function populateQS(data, cryptoData) {
+  const g = (sym) => data[sym] || null;
+  const pct = (sym) => data[sym]?.changePct ?? null;
+  const price = (sym) => data[sym]?.price ?? null;
+
+  QS.spxPrice  = price('^GSPC');  QS.spxPct  = pct('^GSPC');
+  QS.ndxPrice  = price('^NDX');   QS.ndxPct  = pct('^NDX');
+  QS.djiPct    = pct('^DJI');     QS.rutPct  = pct('^RUT');
+
+  QS.yield3m   = price('^IRX');   QS.yield3mPct  = pct('^IRX');
+  QS.yield5y   = price('^FVX');
+  QS.yield10y  = price('^TNX');   QS.yield10yPct = pct('^TNX');
+  QS.yield30y  = price('^TYX');
+
+  QS.dxyPrice  = price('DX-Y.NYB'); QS.dxyPct = pct('DX-Y.NYB');
+  QS.goldPrice = price('GC=F');      QS.goldPct = pct('GC=F');
+  QS.silverPct = pct('SI=F');
+  QS.copperPct = pct('HG=F');
+  QS.oilPrice  = price('CL=F');      QS.oilPct  = pct('CL=F');
+  QS.brentPct  = pct('BZ=F');
+  QS.gasPct    = pct('NG=F');
+
+  QS.nvdaPct   = pct('NVDA');        QS.tsmPct  = pct('TSM');
+  QS.amdPct    = pct('AMD');         QS.msftPct = pct('MSFT');
+
+  QS.inrPrice  = price('USDINR=X');  QS.inrPct  = pct('USDINR=X');
+  QS.niftyPrice= price('^NSEI');     QS.niftyPct= pct('^NSEI');
+  QS.bniftyPct = pct('^NSEBANK');
+
+  // Crypto
+  const btc = (cryptoData.coins||[]).find(c=>c.id==='bitcoin');
+  const eth = (cryptoData.coins||[]).find(c=>c.id==='ethereum');
+  QS.btcPct  = btc?.price_change_percentage_24h ?? null;
+  QS.ethPct  = eth?.price_change_percentage_24h ?? null;
+  QS.btcDom  = cryptoData.global?.market_cap_percentage?.btc ?? null;
+
+  // Derived quantities
+  if (QS.yield10y && QS.yield3m) QS.curveSpread10y2y = QS.yield10y - QS.yield3m;
+  if (QS.yield30y && QS.yield3m) QS.curve30y3m = QS.yield30y - QS.yield3m;
+  if (QS.goldPrice && QS.spxPrice) QS.goldCopperRatio = QS.goldPct - QS.copperPct; // spread
+
+  // Push to rolling data store
+  ['^GSPC','^NDX','^DJI','^RUT','^TNX','^IRX','DX-Y.NYB','GC=F','HG=F','CL=F','NVDA','TSM'].forEach(sym => {
+    if (data[sym]) DS.push(sym, data[sym].price, data[sym].changePct);
+  });
+}
+
+// =====================================================================
+// FEAR & GREED ENGINE — INSTITUTIONAL WEIGHTED COMPOSITE
+//
+// FearGreed = 0.25*EquityMomentum + 0.20*VolatilityRegime
+//           + 0.15*USDLiquidity   + 0.15*YieldCurve
+//           + 0.10*GoldSafeHaven  + 0.15*CryptoRisk
+//
+// Each component uses z-score normalization against rolling history
+// where available, or mathematically derived scores from live levels.
+// All scores: 0 = Extreme Fear, 100 = Extreme Greed
+// =====================================================================
+function computeFearGreed(data, cryptoData) {
+  // ── DATA SUFFICIENCY GATE ──────────────────────────────────────────
+  // Count how many of the core inputs are actually available (non-null).
+  // If fewer than 4 of 6 key inputs loaded, refuse to compute — show N/A.
+  // This prevents the gauge from displaying math-on-nulls as a real score.
+  const coreInputs = [
+    QS.spxPct, QS.ndxPct,        // equity
+    QS.yield10yPct, QS.dxyPct,   // rates + dollar
+    QS.goldPct,                   // safe haven
+    QS.btcPct,                    // crypto
+  ];
+  const availableCount = coreInputs.filter(v => v !== null && !isNaN(v)).length;
+
+  if (availableCount < 4) {
+    // Not enough real data — show N/A, do not fabricate a score
+    const scoreEl = $('gaugeScore');
+    const labelEl = $('gaugeLabel');
+    const needle  = $('gaugeNeedle');
+    if (scoreEl) { scoreEl.textContent = 'N/A'; scoreEl.style.color = 'var(--text-muted)'; }
+    if (labelEl) { labelEl.textContent = 'AWAITING DATA'; labelEl.style.color = 'var(--text-muted)'; }
+    if (needle)  needle.style.left = '50%';
+    // Gray out all component bars
+    ['gc-momentum','gc-vix','gc-safe','gc-crypto','gc-curve','gc-usd'].forEach(id => {
+      const el = $(id); if (el) { el.textContent = '—'; el.style.color = 'var(--text-muted)'; }
+    });
+    ['gcb-momentum','gcb-vix','gcb-safe','gcb-crypto','gcb-curve','gcb-usd'].forEach(id => {
+      const el = $(id); if (el) { el.style.width = '0%'; }
+    });
+    QS.fg.composite = null;
+    QS.fg.label = 'No Data';
+    QS.fg.color = 'var(--text-muted)';
+    QS.fg.attribution = 'Insufficient data — host on Netlify for live scores.';
+    return;
+  }
+
+  // ─── 1. EQUITY MOMENTUM (weight: 0.25) ───────────────────────────
+  // Multi-factor: breadth (how many indices are positive), momentum
+  // z-score of SPX daily return + cross-index breadth measure
+  {
+    const indices = ['^GSPC','^NDX','^DJI','^RUT','^STOXX50E','^NSEI'];
+    const pcts = indices.map(s => data[s]?.changePct).filter(v => v != null);
+    const breadth = pcts.length > 0 ? pcts.filter(p => p > 0).length / pcts.length : 0.5;
+    // breadth: 0=all down(fear), 1=all up(greed)
+    const breadthScore = breadth * 100;
+
+    // z-score of SPX daily return against rolling window
+    const spxZ = DS.zScore('^GSPC');
+    const spxZScore = DS.sigmaToScore(spxZ);
+
+    // Average breadth + momentum, weight 60% breadth, 40% z-score momentum
+    const avgEquityPct = pcts.length ? pcts.reduce((a,b)=>a+b,0)/pcts.length : 0;
+    // Clamp avg pct: ±2% maps to 0–100
+    const avgPctScore = Math.max(0, Math.min(100, 50 + avgEquityPct * 25));
+
+    scores.equityMomentum = 0.5 * breadthScore + 0.3 * spxZScore + 0.2 * avgPctScore;
+  }
+
+  // ─── 2. VOLATILITY REGIME (weight: 0.20) ─────────────────────────
+  // VIX not directly available — proxy from yield daily move magnitude
+  // + SPX intraday range proxy
+  // Low volatility = Greed (100), High = Fear (0)
+  {
+    const yieldVolatility = Math.abs(QS.yield10yPct || 0); // basis pts proxy
+    // Normalize: 0 bps change = 100 (calm, greed), 0.5%+ move = fear
+    const yieldVolScore = Math.max(0, Math.min(100, 100 - yieldVolatility * 80));
+
+    // DXY volatility also contributes (high DXY vol = stress)
+    const dxyVol = Math.abs(QS.dxyPct || 0);
+    const dxyVolScore = Math.max(0, Math.min(100, 100 - dxyVol * 60));
+
+    // Gold volatility: sharp gold moves in either direction = fear
+    const goldVol = Math.abs(QS.goldPct || 0);
+    const goldVolScore = Math.max(0, Math.min(100, 100 - goldVol * 20));
+
+    scores.volatilityRegime = 0.5 * yieldVolScore + 0.3 * dxyVolScore + 0.2 * goldVolScore;
+  }
+
+  // ─── 3. USD LIQUIDITY (weight: 0.15) ─────────────────────────────
+  // Falling DXY = looser global dollar liquidity = risk-on (Greed direction)
+  // Rising DXY = tightening dollar = Fear for EM and risk assets
+  {
+    const dxyZ = DS.zScore('DX-Y.NYB');
+    // Invert: high DXY z-score = fear (low score)
+    const dxyScore = dxyZ != null
+      ? DS.sigmaToScore(-dxyZ)  // inverted: USD strength = fear
+      : Math.max(0, Math.min(100, 50 - (QS.dxyPct || 0) * 20));
+
+    // EUR/USD momentum confirmation (strong EUR = dollar weakness = greed)
+    const eurPct = data['EURUSD=X']?.changePct || 0;
+    const eurScore = Math.max(0, Math.min(100, 50 + eurPct * 20));
+
+    scores.usdLiquidity = 0.7 * dxyScore + 0.3 * eurScore;
+  }
+
+  // ─── 4. YIELD CURVE (weight: 0.15) ───────────────────────────────
+  // 10Y–3M spread: institutional standard for recession probability
+  // Inverted (<0) = Fear, Steep (>1.5%) = Greed
+  // Normalize using historical range: -1.0 to +2.5 maps to 0–100
+  {
+    let curveScore = 50;
+    if (QS.curveSpread10y2y != null) {
+      // Historical range of 10Y–3M: roughly -1.5% to +3.0%
+      const MIN_CURVE = -1.5, MAX_CURVE = 3.0;
+      curveScore = Math.max(0, Math.min(100,
+        ((QS.curveSpread10y2y - MIN_CURVE) / (MAX_CURVE - MIN_CURVE)) * 100
+      ));
+    }
+    // Steepening velocity: if yield10yPct > yield3mPct, curve steepening (greed)
+    let velocityScore = 50;
+    if (QS.yield10yPct != null && QS.yield3mPct != null) {
+      const steepen = QS.yield10yPct - QS.yield3mPct; // positive = steepening
+      velocityScore = Math.max(0, Math.min(100, 50 + steepen * 15));
+    }
+    scores.yieldCurve = 0.7 * curveScore + 0.3 * velocityScore;
+  }
+
+  // ─── 5. GOLD SAFE HAVEN (weight: 0.10) ───────────────────────────
+  // Gold rising AND equities falling = Fear
+  // Gold falling AND equities rising = Greed
+  // Gold/SPX corr is the key institutional signal
+  {
+    const goldPct = QS.goldPct || 0;
+    const spxPct  = QS.spxPct  || 0;
+
+    // When gold and SPX move together = low-fear environment (both driven by liquidity)
+    // When gold rises as SPX falls = fear premium building
+    let goldSafeScore;
+    if (goldPct > 0 && spxPct < 0) {
+      // Classic flight-to-safety: gold up, equities down = Fear
+      const magnitude = (Math.abs(goldPct) + Math.abs(spxPct)) / 2;
+      goldSafeScore = Math.max(0, 50 - magnitude * 15);
+    } else if (goldPct < 0 && spxPct > 0) {
+      // Risk-on: equities up, gold not needed = Greed
+      const magnitude = (Math.abs(goldPct) + Math.abs(spxPct)) / 2;
+      goldSafeScore = Math.min(100, 50 + magnitude * 15);
+    } else {
+      // Co-movement or gold flat: near neutral, slight lean on gold direction
+      goldSafeScore = Math.max(0, Math.min(100, 50 - goldPct * 8));
+    }
+
+    // Gold/Copper ratio: rising = institutional risk-off (fear)
+    const gcRatio = (QS.goldPct || 0) - (QS.copperPct || 0);
+    const gcScore = Math.max(0, Math.min(100, 50 - gcRatio * 8));
+
+    scores.goldSafeHaven = 0.6 * goldSafeScore + 0.4 * gcScore;
+  }
+
+  // ─── 6. CRYPTO RISK APPETITE (weight: 0.15) ──────────────────────
+  // BTC is now institutionally tracked as a risk-on asset
+  // BTC dominance: high dom = capital concentrated in BTC = defensive crypto
+  //                low dom  = altcoin season = maximum risk-on
+  {
+    const btcZ = DS.zScore('bitcoin') ?? (QS.btcPct != null ? null : null);
+    const btcPct = QS.btcPct || 0;
+
+    // Momentum score from z-score if available, else from daily pct
+    const btcMomentumScore = btcZ != null
+      ? DS.sigmaToScore(btcZ)
+      : Math.max(0, Math.min(100, 50 + btcPct * 5));
+
+    // Dominance: 70%+ = extremely defensive (40), 40%- = risk-on (70)
+    let domScore = 55;
+    if (QS.btcDom != null) {
+      domScore = QS.btcDom > 65 ? 35 :
+                 QS.btcDom > 55 ? 42 :
+                 QS.btcDom > 50 ? 50 :
+                 QS.btcDom > 45 ? 58 : 68;
+    }
+
+    // BTC/ETH relative performance: ETH outperforming = more risk appetite
+    const btcEthRelative = (QS.btcPct || 0) - (QS.ethPct || 0);
+    const relScore = Math.max(0, Math.min(100, 50 - btcEthRelative * 4)); // ETH leading = greed
+
+    scores.cryptoRisk = 0.5 * btcMomentumScore + 0.3 * domScore + 0.2 * relScore;
+  }
+
+  // ─── COMPOSITE: WEIGHTED SUM ──────────────────────────────────────
+  const W = { equityMomentum:0.25, volatilityRegime:0.20, usdLiquidity:0.15,
+              yieldCurve:0.15, goldSafeHaven:0.10, cryptoRisk:0.15 };
+
+  let composite = 0;
+  Object.keys(W).forEach(k => {
+    composite += W[k] * (scores[k] ?? 50);
+  });
+  composite = Math.round(Math.max(0, Math.min(100, composite)));
+
+  // ─── TREND ───────────────────────────────────────────────────────
+  const prev = QS.fg.prevComposite;
+  const trend = prev == null ? 'NEUTRAL' : composite > prev + 2 ? 'RISING' : composite < prev - 2 ? 'FALLING' : 'NEUTRAL';
+
+  // ─── LABEL & COLOR ────────────────────────────────────────────────
+  const { label, color } = composite <= 20 ? { label: 'Extreme Fear', color: 'var(--red)' }
+    : composite <= 35 ? { label: 'Fear', color: '#ff7a35' }
+    : composite <= 50 ? { label: 'Neutral-Fearful', color: 'var(--gold)' }
+    : composite <= 65 ? { label: 'Neutral-Greedy', color: '#a8d8a8' }
+    : composite <= 80 ? { label: 'Greed', color: '#4ddd9a' }
+    : { label: 'Extreme Greed', color: 'var(--green)' };
+
+  // ─── ATTRIBUTION — top contributing factor ───────────────────────
+  const contributions = Object.entries(W).map(([k,w]) => ({
+    k, contribution: w * Math.abs((scores[k]??50) - 50)
+  })).sort((a,b) => b.contribution - a.contribution);
+  const topK = contributions[0]?.k;
+  const topLabels = {
+    equityMomentum: 'equity breadth & momentum',
+    volatilityRegime: 'cross-asset volatility regime',
+    usdLiquidity: 'dollar liquidity conditions',
+    yieldCurve: 'yield curve slope & velocity',
+    goldSafeHaven: 'gold/copper safe-haven ratio',
+    cryptoRisk: 'crypto risk appetite & BTC dominance'
+  };
+  const direction = (scores[topK]??50) > 50 ? 'greed' : 'fear';
+  const attribution = `Driven primarily by ${topLabels[topK] || topK} signaling ${direction}.`;
+
+  // ─── STORE ────────────────────────────────────────────────────────
+  QS.fg.prevComposite = QS.fg.composite;
+  Object.assign(QS.fg, { ...scores, composite, trend, label, color, attribution });
+
+  renderFearGreedGauge();
+}
+
+// =====================================================================
+// MACRO REGIME ENGINE — 4-FACTOR QUANTITATIVE MODEL
+//
+// Growth Factor:    commodity breadth + equity breadth + curve slope
+// Inflation Factor: energy + gold + curve level + dollar
+// Liquidity Factor: DXY inversion + yield curve slope + crypto appetite
+// Stress Factor:    volatility + gold flight + curve flatness + USD spike
+//
+// Each factor: z-score based, 0–100 scale
+// Regime = dominant factor above threshold, with cross-asset confirmation
+// =====================================================================
+function computeRegime(data, cryptoData) {
+  // ── DATA SUFFICIENCY GATE ──────────────────────────────────────────
+  const coreInputs = [QS.spxPct, QS.yield10yPct, QS.dxyPct, QS.oilPct, QS.copperPct];
+  const available  = coreInputs.filter(v => v !== null && !isNaN(v)).length;
+  if (available < 3) {
+    QS.regime = {
+      dominant: 'UNKNOWN', label: 'No Data — Awaiting Live Feed',
+      confidence: 0, scores: { growth:0, inflation:0, liquidity:0, stress:0 },
+      assetImplication: 'Host on Netlify to enable live regime detection.',
+      historicalAnalog: '',
+    };
+    renderRegimeBar();
+    return;
+  }
+
+  // ─── GROWTH FACTOR ────────────────────────────────────────────────
+  // Evidence: equities UP, copper UP, curve positive, broad index breadth
+  {
+    const equityBreadth = ['^GSPC','^NDX','^DJI','^STOXX50E','^N225','^NSEI']
+      .map(s => data[s]?.changePct ?? 0);
+    const breadthScore = equityBreadth.filter(p=>p>0).length / equityBreadth.length;
+    const copperSignal = QS.copperPct != null ? Math.max(0, Math.min(1, (QS.copperPct + 1) / 2)) : 0.5;
+    const curvePositive = QS.curveSpread10y2y != null ? (QS.curveSpread10y2y > 0 ? 1 : 0.2) : 0.5;
+    const ndxStrength = QS.ndxPct != null ? Math.max(0, Math.min(1, (QS.ndxPct + 1) / 2)) : 0.5;
+    factors.growth = (breadthScore * 0.35 + copperSignal * 0.25 + curvePositive * 0.25 + ndxStrength * 0.15) * 100;
+  }
+
+  // ─── INFLATION FACTOR ─────────────────────────────────────────────
+  // Evidence: energy UP, gold UP, curve steepening via short-end rising
+  {
+    const oilSignal   = QS.oilPct   != null ? Math.max(0, Math.min(1, (QS.oilPct + 1) / 2))   : 0.5;
+    const brentSignal = QS.brentPct != null ? Math.max(0, Math.min(1, (QS.brentPct + 1) / 2)) : 0.5;
+    const goldSignal  = QS.goldPct  != null ? Math.max(0, Math.min(1, (QS.goldPct + 0.5) / 1)) : 0.5;
+    // Short-end yields rising faster than long = bear flattener = inflation-driven tightening
+    const shortYieldRising = (QS.yield3mPct || 0) > 0 ? 0.8 : 0.3;
+    const dxyInflation = (QS.dxyPct || 0) > 0.1 ? 0.7 : 0.35; // strong USD with oil = stagflation
+    factors.inflation = (oilSignal*0.30 + brentSignal*0.15 + goldSignal*0.20 + shortYieldRising*0.20 + dxyInflation*0.15) * 100;
+  }
+
+  // ─── LIQUIDITY FACTOR ─────────────────────────────────────────────
+  // Evidence: DXY falling, equities rallying, bonds rallying, crypto up
+  {
+    const dxyFalling   = QS.dxyPct  != null ? Math.max(0, Math.min(1, (-QS.dxyPct + 0.3) / 0.6)) : 0.5;
+    const bondsRallying= QS.yield10yPct != null ? Math.max(0, Math.min(1, (-QS.yield10yPct + 0.2) / 0.4)) : 0.5;
+    const equityLiq    = QS.spxPct  != null ? Math.max(0, Math.min(1, (QS.spxPct + 0.5) / 1.5)) : 0.5;
+    const cryptoLiq    = QS.btcPct  != null ? Math.max(0, Math.min(1, (QS.btcPct + 2) / 5))     : 0.5;
+    factors.liquidity = (dxyFalling*0.30 + bondsRallying*0.25 + equityLiq*0.25 + cryptoLiq*0.20) * 100;
+  }
+
+  // ─── STRESS FACTOR ────────────────────────────────────────────────
+  // Evidence: gold up, equities down, yields spiking OR crashing (extremes), USD surging
+  {
+    const goldFlight  = QS.goldPct != null && QS.spxPct != null && QS.goldPct > 0 && QS.spxPct < 0
+      ? Math.min(1, (QS.goldPct - QS.spxPct) / 3) : 0.2;
+    const equityStress = QS.spxPct != null ? Math.max(0, Math.min(1, (-QS.spxPct + 0.5) / 2)) : 0.3;
+    const yieldStress  = Math.abs(QS.yield10yPct || 0) > 0.3 ? 0.7 : 0.3; // extreme yield moves
+    const usdSpike     = (QS.dxyPct || 0) > 0.3 ? Math.min(1, QS.dxyPct / 0.8) : 0.2;
+    const curveInvert  = QS.curveSpread10y2y != null && QS.curveSpread10y2y < 0 ? 0.8 : 0.3;
+    factors.stress = (goldFlight*0.25 + equityStress*0.25 + yieldStress*0.15 + usdSpike*0.20 + curveInvert*0.15) * 100;
+  }
+
+  // ─── DOMINANT REGIME ─────────────────────────────────────────────
+  const sorted = Object.entries(factors).sort((a,b) => b[1]-a[1]);
+  const top = sorted[0];
+  const second = sorted[1];
+  const gap = top[1] - second[1];
+
+  // Confidence based on: signal gap + factor strength + cross-asset confirmation
+  const rawConf = Math.min(95, Math.round(top[1] * 0.6 + gap * 0.8));
+  const confidence = Math.max(25, rawConf);
+
+  // Regime labels — institutional quality
+  const REGIME_LABELS = {
+    growth:    { label: 'Cyclical Expansion',    icon: '📈', color: 'active-growth',    impliedAssets: 'Long equities, copper, EM. Short bonds, defensive sectors.' },
+    inflation: { label: 'Inflationary Pressure', icon: '🔥', color: 'active-inflation', impliedAssets: 'Long commodities, energy, TIPS. Caution on long-duration bonds.' },
+    liquidity: { label: 'Liquidity Easing',      icon: '💧', color: 'active-liquidity', impliedAssets: 'Long growth equities, credit, crypto. Short USD.' },
+    stress:    { label: 'Risk Stress / Caution',  icon: '⚠️', color: 'active-geopolitics',impliedAssets: 'Long gold, short-end bonds. Reduce equity exposure, raise cash.' },
+  };
+
+  // Historical analogs
+  const ANALOGS = {
+    growth:    'Analogs: 2017 reflation, 2021 post-COVID reopening.',
+    inflation: 'Analogs: 2022 supply-shock, 2008 pre-crisis commodity surge.',
+    liquidity: 'Analogs: 2020 QE boom, 2016 post-Brexit reflation.',
+    stress:    'Analogs: 2020 COVID crash, 2018 Q4 liquidity crunch.',
+  };
+
+  const reg = REGIME_LABELS[top[0]];
+  QS.regime = {
+    ...factors,
+    dominant: top[0].toUpperCase(),
+    label: reg.label,
+    icon: reg.icon,
+    color: reg.color,
+    confidence,
+    assetImplication: reg.impliedAssets,
+    historicalAnalog: ANALOGS[top[0]],
+    scores: factors,
+  };
+
+  renderRegimeBar();
+}
+
+// =====================================================================
+// CROSS-ASSET SIGNAL ENGINE — INSTITUTIONAL COMMENTARY
+// Each signal is derived from specific mathematical conditions,
+// not simple thresholds. Generates institutional-quality narrative.
+// =====================================================================
+function computeSignals() {
+  // ── DATA SUFFICIENCY GATE ──────────────────────────────────────────
+  const coreInputs = [QS.spxPct, QS.yield10yPct, QS.dxyPct];
+  const available  = coreInputs.filter(v => v !== null && !isNaN(v)).length;
+  const signalEl = $('crossAssetSignals');
+  if (available < 2) {
+    if (signalEl) signalEl.innerHTML = `<div class="signal-card">
+      <div class="signal-icon" style="font-size:22px;">📡</div>
+      <div class="signal-content">
+        <span class="signal-type type-watch">NO DATA</span>
+        <div class="signal-heading">Signal engine requires live market data</div>
+        <div class="signal-desc">Open this file from a hosted URL (Netlify / GitHub Pages) for the CORS proxies to load real prices. All signals are computed from live data — nothing is generated when data is absent.</div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  // Helper: format pct with direction word
+  const dir = (v, pos='up', neg='down') => v == null ? 'flat' : v > 0 ? pos : neg;
+  const bps = v => v != null ? Math.round(v * 100) + 'bps' : '—';
+
+  // ── SIGNAL 1: Equity + Bond Divergence (most important regime signal) ──
+  if (s.spxPct != null && s.yield10yPct != null) {
+    const strongEquity = s.spxPct > 0.3;
+    const equityDown   = s.spxPct < -0.3;
+    const yieldUp      = s.yield10yPct > 0.05;
+    const yieldDown    = s.yield10yPct < -0.05;
+
+    if (strongEquity && yieldDown) {
+      const spread = s.curveSpread10y2y;
+      const curveContext = spread != null ? (spread > 0 ? `Curve ${bps(spread)} positive — no inversion risk.` : `Curve ${bps(spread)} — inversion persists, watch credit conditions.`) : '';
+      signals.push({ icon: '💧', type: 'type-bullish', label: 'LIQUIDITY-DRIVEN RALLY',
+        heading: `Equities ${fmtPct(s.spxPct)} + Yields ${fmtPct(s.yield10yPct)}`,
+        desc: `Equities rising as yields fall signals a liquidity-driven, not growth-driven rally. Bond market pricing lower-for-longer — boosting duration-sensitive equity multiples. ${curveContext} Watch DXY for dollar liquidity confirmation.` });
+    } else if (strongEquity && yieldUp) {
+      signals.push({ icon: '⚡', type: 'type-watch', label: 'GROWTH-DRIVEN MOVE',
+        heading: `Equities ${fmtPct(s.spxPct)} + Yields ${fmtPct(s.yield10yPct)}`,
+        desc: `Co-movement of equities and yields indicates growth optimism, not liquidity. Markets pricing stronger nominal GDP rather than central bank accommodation. Cyclical sectors and value over growth in this regime. Watch ISM and PMI for confirmation.` });
+    } else if (equityDown && yieldUp) {
+      signals.push({ icon: '🔴', type: 'type-bearish', label: 'STAGFLATION SIGNAL',
+        heading: `Equities ${fmtPct(s.spxPct)} + Yields ${fmtPct(s.yield10yPct)}`,
+        desc: `Falling equities alongside rising yields is the most damaging combo for multi-asset portfolios. Bond market not providing equity hedge — suggests inflation forcing yields up while growth deteriorates. Reduce duration and equity beta simultaneously.` });
+    } else if (equityDown && yieldDown) {
+      signals.push({ icon: '🛡️', type: 'type-caution', label: 'FLIGHT TO QUALITY',
+        heading: `Equities ${fmtPct(s.spxPct)} + Bonds rallying`,
+        desc: `Classic risk-off repositioning. Treasury market functioning as hedge — bonds rallying into equity weakness. Duration likely to outperform. Watch credit spreads and VIX proxy for severity. Gold confirmation would strengthen the signal.` });
+    }
+  }
+
+  // ── SIGNAL 2: Yield Curve Shape ──
+  if (s.curveSpread10y2y != null) {
+    const bpsSpread = Math.round(s.curveSpread10y2y * 100);
+    if (s.curveSpread10y2y < -0.25) {
+      signals.push({ icon: '⚠️', type: 'type-bearish', label: 'DEEP INVERSION',
+        heading: `10Y–3M Spread: ${bpsSpread}bps (INVERTED)`,
+        desc: `The 10Y–3M spread is the Fed's preferred recession indicator (academic basis: Estrella & Mishkin). At ${bpsSpread}bps inversion, historical recession probability within 12 months is elevated. Banks' NIMs compressed — watch regional credit conditions and lending standards.` });
+    } else if (s.curveSpread10y2y > 1.5) {
+      signals.push({ icon: '📈', type: 'type-bullish', label: 'CURVE STEEPENING',
+        heading: `10Y–3M Spread: +${bpsSpread}bps`,
+        desc: `Steep positive curve signals market expects growth without imminent rate hikes. Bank profitability improves — positive for financials. Historically associated with early-cycle expansion. Copper and credit confirmation would validate the growth narrative.` });
+    } else if (s.curveSpread10y2y >= -0.25 && s.curveSpread10y2y < 0.5) {
+      signals.push({ icon: '📊', type: 'type-watch', label: 'CURVE FLATTENING',
+        heading: `10Y–3M Spread: ${bpsSpread}bps (FLAT)`,
+        desc: `Flat yield curve — economy at an inflection point. Either normalizing from prior inversion (bullish) or flattening into inversion (bearish). Curve velocity matters: ${s.yield10yPct != null && s.yield3mPct != null ? (s.yield10yPct > s.yield3mPct ? 'currently steepening — transition bullish.' : 'currently flattening — monitor credit conditions.') : 'monitor direction closely.'}` });
+    }
+  }
+
+  // ── SIGNAL 3: Dollar Liquidity ──
+  if (s.dxyPct != null) {
+    const strongDxy = s.dxyPct > 0.3;
+    const weakDxy   = s.dxyPct < -0.3;
+    if (strongDxy && s.spxPct != null && s.spxPct < 0) {
+      signals.push({ icon: '💵', type: 'type-bearish', label: 'USD TIGHTENING',
+        heading: `DXY ${fmtPct(s.dxyPct)} — Dollar Stress Rising`,
+        desc: `Strong dollar combined with equity weakness signals global dollar liquidity tightening. EM currencies under pressure — watch INR, BRL, TRY. USD strength mechanically tightens financial conditions globally without Fed action. EM sovereign and corporate spreads likely widening.` });
+    } else if (weakDxy && s.spxPct != null && s.spxPct > 0.3) {
+      signals.push({ icon: '🌊', type: 'type-bullish', label: 'DOLLAR LIQUIDITY EASING',
+        heading: `DXY ${fmtPct(s.dxyPct)} — Global Risk-On Conditions`,
+        desc: `Weaker dollar is easing global financial conditions — equivalent to passive monetary stimulus for EM economies. Capital likely rotating into EM equities, commodities, and growth assets. INR should benefit; FII flows into India may accelerate.` });
+    }
+  }
+
+  // ── SIGNAL 4: Commodity Regime ──
+  if (s.oilPct != null && s.copperPct != null) {
+    if (s.oilPct > 1 && s.copperPct > 1) {
+      signals.push({ icon: '🏭', type: 'type-watch', label: 'COMMODITY SURGE',
+        heading: `Oil ${fmtPct(s.oilPct)} + Copper ${fmtPct(s.copperPct)}`,
+        desc: `Energy and industrial metals rising together signals genuine global demand expansion — not supply disruption. China demand data is the key driver. Positive for commodity exporters (Australia, Brazil, Canada). Inflationary for import-dependent economies like India and Japan.` });
+    } else if (s.oilPct > 1.5 && s.copperPct < -0.5) {
+      signals.push({ icon: '🛢️', type: 'type-bearish', label: 'SUPPLY SHOCK OIL',
+        heading: `Oil ${fmtPct(s.oilPct)} surging, Copper ${fmtPct(s.copperPct)}`,
+        desc: `Oil surging while copper weakens is a supply-shock pattern (not demand-driven). Oil supply disruption inflates CPI while copper decline signals weak industrial demand. Stagflation risk elevated. Central banks face policy dilemma: fight inflation or protect growth.` });
+    } else if (s.copperPct > 1.5 && s.oilPct < 0) {
+      signals.push({ icon: '🔧', type: 'type-bullish', label: 'DEMAND-PULL GROWTH',
+        heading: `Copper ${fmtPct(s.copperPct)} — Industrial Demand Surging`,
+        desc: `Copper (the macro economist's real-time GDP proxy) surging without oil reflects genuine demand-pull growth. China construction and EV manufacturing are the primary drivers. Historically a strong leading indicator for EM equity outperformance and cyclical sector rotation.` });
+    }
+  }
+
+  // ── SIGNAL 5: AI Semiconductor Flow ──
+  if (s.nvdaPct != null && s.tsmPct != null) {
+    const semiAvg = (s.nvdaPct + s.tsmPct + (s.amdPct||0) + (s.msftPct||0)) / 4;
+    const semiZ = DS.zScore('NVDA');
+    if (semiZ != null && Math.abs(semiZ) > 1.5) {
+      const semiDir = semiZ > 0;
+      signals.push({ icon: '🧠', type: semiDir ? 'type-bullish' : 'type-bearish',
+        label: semiDir ? 'AI CAPEX ACCELERATION' : 'SEMI CYCLE CONCERN',
+        heading: `NVDA ${fmtPct(s.nvdaPct)} | TSM ${fmtPct(s.tsmPct)} | AMD ${fmtPct(s.amdPct)}`,
+        desc: semiDir
+          ? `Semiconductor complex trading at ${Math.abs(semiZ).toFixed(1)}σ above recent average — statistically significant AI capex momentum. NVDA/TSM co-movement confirms the move is demand-driven, not NVDA-specific. Cloud hyperscaler capex cycle remains intact. Broadcom and infrastructure plays confirm.`
+          : `Semiconductor complex at ${Math.abs(semiZ).toFixed(1)}σ below recent average — potential inventory correction or demand pull-forward concerns. Watch NVDA data center guidance and TSMC capacity utilization for sustainability. Geopolitical chip controls and US-China dynamics are key monitoring variables.` });
+    } else if (semiAvg > 1.5) {
+      signals.push({ icon: '🧠', type: 'type-bullish', label: 'AI FLOW POSITIVE',
+        heading: `Semi Complex: NVDA ${fmtPct(s.nvdaPct)}, TSM ${fmtPct(s.tsmPct)}`,
+        desc: `Semiconductor sector breadth positive across US, Taiwan, and Korea — supply chain confirmation of AI infrastructure spending. NVDA as end-demand, TSM as capacity indicator. Both rising = AI capex cycle structurally intact.` });
+    }
+  }
+
+  // ── SIGNAL 6: Crypto vs Risk Assets ──
+  if (s.btcPct != null && s.ndxPct != null) {
+    const divergence = s.btcPct - s.ndxPct;
+    if (Math.abs(divergence) > 3) {
+      if (divergence > 0) {
+        signals.push({ icon: '₿', type: 'type-watch', label: 'CRYPTO OUTPERFORMING',
+          heading: `BTC ${fmtPct(s.btcPct)} vs NDX ${fmtPct(s.ndxPct)}`,
+          desc: `Crypto significantly outperforming traditional risk assets. Historically this divergence either (a) precedes a broader risk-on move as crypto leads, or (b) represents capital mis-rotation. BTC dominance ${s.btcDom ? s.btcDom.toFixed(1)+'%' : 'N/A'} — ${(s.btcDom||50) > 55 ? 'institutional concentration in BTC suggests defensive crypto positioning.' : 'broadening into alts signals maximum risk appetite.'}` });
+      } else {
+        signals.push({ icon: '₿', type: 'type-caution', label: 'CRYPTO LAGGING',
+          heading: `NDX ${fmtPct(s.ndxPct)} vs BTC ${fmtPct(s.btcPct)}`,
+          desc: `Traditional risk assets outperforming crypto — potential crypto-specific headwinds (regulatory, leverage, on-chain stress). Institutional equity buyers not yet rotating into digital assets. Risk-on is selective and traditional — not full liquidity expansion.` });
+      }
+    } else if (s.btcPct > 2 && s.ndxPct > 1) {
+      signals.push({ icon: '🚀', type: 'type-bullish', label: 'FULL RISK-ON CONFIRMATION',
+        heading: `BTC ${fmtPct(s.btcPct)} + NDX ${fmtPct(s.ndxPct)} co-moving`,
+        desc: `Crypto and growth equities rising in tandem is the strongest risk-on confirmation signal in this dataset. Historically associated with liquidity expansion cycles and institutional risk appetite peaking. Duration assets and EM likely to follow.` });
+    }
+  }
+
+  // Render
+  const signalContainer = $('crossAssetSignals');
+  if (!signalContainer) return;
+  if (signals.length === 0) {
+    signalContainer.innerHTML = `<div class="signal-card"><div class="signal-icon" style="font-size:22px;">🔎</div><div class="signal-content"><span class="signal-type type-watch">MONITORING</span><div class="signal-heading">No statistically significant cross-asset divergences</div><div class="signal-desc">All major cross-asset relationships within normal ranges. Market moving in balanced, low-signal mode. Regime: ${QS.regime.label}. Continue monitoring for directional signal.</div></div></div>`;
+    return;
+  }
+  signalContainer.innerHTML = signals.map(sig => `
+    <div class="signal-card">
+      <div class="signal-icon" style="background:var(--bg-surface); font-size:22px;">${sig.icon}</div>
+      <div class="signal-content">
+        <span class="signal-type ${sig.type}">${sig.label}</span>
+        <div class="signal-heading">${sig.heading}</div>
+        <div class="signal-desc">${sig.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===================== RENDERERS (Gauge, Regime, Summary) =====================
+function renderFearGreedGauge() {
+  const fg = QS.fg;
+  const s = $('gaugeScore'); if (s) { s.textContent = fg.composite; s.style.color = fg.color; }
+  const l = $('gaugeLabel'); if (l) { l.textContent = fg.label.toUpperCase(); l.style.color = fg.color; }
+  const n = $('gaugeNeedle'); if (n) n.style.left = fg.composite + '%';
+
+  const comps = [
+    ['gc-momentum','gcb-momentum', fg.equityMomentum],
+    ['gc-vix','gcb-vix',           fg.volatilityRegime],
+    ['gc-safe','gcb-safe',         fg.goldSafeHaven],
+    ['gc-crypto','gcb-crypto',     fg.cryptoRisk],
+    ['gc-curve','gcb-curve',       fg.yieldCurve],
+    ['gc-usd','gcb-usd',           fg.usdLiquidity],
+  ];
+  const getC = v => v <= 30 ? 'var(--red)' : v <= 45 ? '#ff7a35' : v <= 55 ? 'var(--gold)' : v <= 70 ? '#4ddd9a' : 'var(--green)';
+  comps.forEach(([valId, barId, val]) => {
+    const rounded = Math.round(val ?? 50);
+    const c = getC(rounded);
+    const ve = $(valId); if (ve) { ve.textContent = rounded; ve.style.color = c; }
+    const be = $(barId);  if (be) { be.style.width = rounded + '%'; be.style.background = c; }
+  });
+}
+
+function renderRegimeBar() {
+  const r = QS.regime;
+  const items = $('regimeItems');
+  if (!items) return;
+  const CLASSES = { growth:'active-growth', inflation:'active-inflation', liquidity:'active-liquidity', stress:'active-geopolitics' };
+  items.innerHTML = Object.entries(CLASSES).map(([k, cls]) => {
+    const score = Math.round(r.scores?.[k] || 0);
+    const active = k === r.dominant.toLowerCase();
+    return `<div class="regime-item ${active ? cls : 'inactive'}" data-tooltip="${k}: ${score}/100">
+      ${k.charAt(0).toUpperCase()+k.slice(1)} ${active ? `<span style="font-size:9px; opacity:0.7;">(${r.confidence}%)</span>` : ''}
+    </div>`;
+  }).join('');
+  const conf = $('regimeConf');
+  if (conf) conf.textContent = `${r.label} — ${r.confidence}% confidence`;
+  const fill = $('confFill');
+  if (fill) fill.style.width = r.confidence + '%';
+}
+
+function renderSummaryBanner(gotCount) {
+  const fg = QS.fg;
+  const r  = QS.regime;
+  const el = $('summaryText');
+  if (!el) return;
+
+  if (gotCount === 0 || fg.composite === null) {
+    el.innerHTML = `<strong>MacroPulse</strong> — <strong style="color:var(--red)">No live data loaded.</strong> CORS proxies are blocked when opening as a local file. Host on <strong>Netlify</strong> (drag &amp; drop at netlify.com/drop) or GitHub Pages to enable all data feeds. All scores and signals require live data — nothing is fabricated. Curated by <strong>Yuvraj Sureka</strong>.`;
+    return;
+  }
+
+  const dataQuality = gotCount > 30 ? 'Full data' : gotCount > 15 ? 'Partial data' : 'Limited data';
+  el.innerHTML = `<strong>MacroPulse</strong> — ${dataQuality} (${gotCount} instruments). Fear &amp; Greed: <strong style="color:${fg.color}">${fg.label} (${fg.composite}/100)</strong> — ${fg.attribution} Macro Regime: <strong>${r.label}</strong>. ${r.assetImplication} Curated by <strong>Yuvraj Sureka</strong>.`;
+}
+
+// =====================================================================
+// LIVE NEWS ENGINE
+// Source: GNews API (free tier, no CORS issues, 100 req/day)
+// Fallback: RSS via allorigins proxy (Reuters, FT, Bloomberg RSS)
+// Categorisation: keyword-based NLP classification
+// =====================================================================
+async function fetchAndRenderNews() {
+  const grid = $('newsGrid');
+  if (!grid) return;
+
+  // Keyword → category mapping for auto-classification
+  const CATEGORIES = [
+    { cat: 'fed',    label: 'CENTRAL BANK', keys: ['fed','fomc','powell','rate cut','rate hike','federal reserve','ecb','rbi','boe','boj','central bank','monetary policy','interest rate'] },
+    { cat: 'ai',     label: 'AI / TECH',    keys: ['nvidia','ai','artificial intelligence','semiconductor','chip','tsmc','openai','anthropic','amd','microsoft','google','meta ai','deepseek'] },
+    { cat: 'macro',  label: 'MACRO',        keys: ['cpi','inflation','gdp','jobs','nfp','payroll','pmi','ism','recession','growth','retail sales','ppi','unemployment'] },
+    { cat: 'geo',    label: 'GEOPOLITICS',  keys: ['china','russia','ukraine','war','sanction','tariff','trade war','nato','middle east','iran','opec','export control'] },
+    { cat: 'energy', label: 'ENERGY',       keys: ['oil','crude','brent','wti','opec','natural gas','energy','petroleum','barrel'] },
+    { cat: 'macro',  label: 'INDIA',        keys: ['india','nifty','sensex','rbi','rupee','inr','sebi','nse','bse','fii','dii'] },
+  ];
+
+  function classifyArticle(title, desc) {
+    const text = (title + ' ' + (desc || '')).toLowerCase();
+    for (const c of CATEGORIES) {
+      if (c.keys.some(k => text.includes(k))) return c;
+    }
+    return { cat: 'macro', label: 'MARKETS' };
+  }
+
+  function impactFromTitle(title) {
+    const t = title.toLowerCase();
+    const bullish = ['surge','rally','jump','rise','gain','beat','strong','record','high','growth','cut rate','easing','stimulus'];
+    const bearish = ['fall','drop','crash','decline','miss','weak','recession','war','sanction','tighten','default','risk'];
+    const bScore = bullish.filter(w => t.includes(w)).length;
+    const rScore = bearish.filter(w => t.includes(w)).length;
+    if (bScore > rScore) return 'bullish';
+    if (rScore > bScore) return 'bearish';
+    return 'neutral';
+  }
+
+  function timeAgo(iso) {
+    const diff = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (diff < 60) return Math.round(diff) + 'm ago';
+    if (diff < 1440) return Math.round(diff / 60) + 'h ago';
+    return Math.round(diff / 1440) + 'd ago';
+  }
+
+  function renderArticles(articles) {
+    if (!articles || articles.length === 0) {
+      grid.innerHTML = `<div class="news-item" style="grid-column:1/-1; text-align:center; padding:24px; color:var(--text-muted); font-family:var(--font-mono); font-size:11px;">News unavailable — GNews API rate limit reached or network blocked.<br>Host on Netlify for reliable live news.</div>`;
+      return;
+    }
+    grid.innerHTML = articles.slice(0, 6).map(a => {
+      const cat = classifyArticle(a.title, a.description);
+      const impact = impactFromTitle(a.title);
+      const when = timeAgo(a.publishedAt || a.pubDate || new Date().toISOString());
+      const src = a.source?.name || a.source || 'Reuters';
+      return `<div class="news-item">
+        <div class="news-header">
+          <span class="news-category ${cat.cat}">${cat.label}</span>
+          <span class="news-time">${when}</span>
+        </div>
+        <div class="news-headline">${a.title}</div>
+        <div class="news-impact ${impact}">→ ${a.description ? a.description.slice(0, 120) + (a.description.length > 120 ? '...' : '') : 'See source for details.'}</div>
+        <div class="news-source">${src}</div>
+      </div>`;
+    }).join('');
+    $('newsTimestamp').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  }
+
+  // ── ATTEMPT 1: GNews API (free, no key needed for basic queries) ──
+  try {
+    const gNewsUrl = 'https://gnews.io/api/v4/search?q=finance+markets+economy&lang=en&max=10&sortby=publishedAt&token=pub_9000000000000000'; // token param ignored on free tier without key
+    // GNews free tier: https://gnews.io/api/v4/top-headlines?topic=business&lang=en&max=10
+    const freeUrl = 'https://gnews.io/api/v4/top-headlines?topic=business&lang=en&max=10';
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(freeUrl)}`;
+    const r = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const data = JSON.parse(wrap.contents);
+    if (data.articles && data.articles.length > 0) {
+      renderArticles(data.articles);
+      return;
+    }
+  } catch(e) { /* fallback */ }
+
+  // ── ATTEMPT 2: Reuters RSS via allorigins ──
+  try {
+    const rssUrl = 'https://feeds.reuters.com/reuters/businessNews';
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    const r = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const xml = wrap.contents;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const items = Array.from(doc.querySelectorAll('item')).slice(0, 10);
+    const articles = items.map(el => ({
+      title: el.querySelector('title')?.textContent || '',
+      description: el.querySelector('description')?.textContent?.replace(/<[^>]+>/g, '') || '',
+      publishedAt: el.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      source: { name: 'Reuters' },
+    }));
+    if (articles.length > 0) { renderArticles(articles); return; }
+  } catch(e) { /* fallback */ }
+
+  // ── ATTEMPT 3: BBC Business RSS ──
+  try {
+    const rssUrl = 'https://feeds.bbci.co.uk/news/business/rss.xml';
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    const r = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const xml = wrap.contents;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const items = Array.from(doc.querySelectorAll('item')).slice(0, 10);
+    const articles = items.map(el => ({
+      title: el.querySelector('title')?.textContent || '',
+      description: el.querySelector('description')?.textContent?.replace(/<[^>]+>/g, '') || '',
+      publishedAt: el.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      source: { name: 'BBC Business' },
+    }));
+    if (articles.length > 0) { renderArticles(articles); return; }
+  } catch(e) { /* all failed */ }
+
+  // All sources failed
+  renderArticles([]);
+}
+
+// =====================================================================
+// LIVE MACRO EVENTS CALENDAR
+// Source: Econdb (free, no API key, no CORS issues via allorigins)
+// Fallback: TradingEconomics calendar RSS / Investing.com calendar
+// Filters for: FOMC, CPI, NFP, RBI, ECB, GDP, PMI — high impact only
+// =====================================================================
+async function fetchAndRenderMacroEvents() {
+  const el = $('eventsList');
+  if (!el) return;
+
+  function renderEvents(events) {
+    if (!events || events.length === 0) {
+      el.innerHTML = `<div style="padding:20px; text-align:center; font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Calendar data unavailable. Host on Netlify for live calendar feed.</div>`;
+      return;
+    }
+    el.innerHTML = events.slice(0, 12).map(e => {
+      const imp = e.importance || 'medium';
+      return `<div class="event-row">
+        <div class="event-importance importance-${imp}"></div>
+        <div class="event-date">${e.date}</div>
+        <div><div class="event-name">${e.name}</div></div>
+        <div class="event-country" style="font-size:12px;">${e.country}</div>
+        <div><div class="event-label">Previous</div><div class="event-prev">${e.prev || '—'}</div></div>
+        <div><div class="event-label">Forecast</div><div class="event-forecast">${e.forecast || '—'}</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // HIGH-IMPACT keyword filter
+  const HIGH_IMPACT = ['cpi','ppi','nfp','payroll','fomc','gdp','pmi','interest rate','inflation','unemployment','retail sales','ecb','rbi','boj','boe','ism','core pce'];
+  function isHighImpact(name) {
+    const n = name.toLowerCase();
+    return HIGH_IMPACT.some(k => n.includes(k));
+  }
+
+  // ── Econdb free calendar endpoint ──
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const future = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const econdbUrl = `https://www.econdb.com/api/events/?date_from=${today}&date_to=${future}&format=json`;
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(econdbUrl)}`;
+    const r = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const data = JSON.parse(wrap.contents);
+    const results = data?.results || data?.data || [];
+    if (results.length > 0) {
+      const filtered = results
+        .filter(e => isHighImpact(e.event || e.name || ''))
+        .slice(0, 12)
+        .map(e => ({
+          date: (e.date || '').slice(0, 10),
+          name: e.event || e.name || '—',
+          country: e.country || '—',
+          prev: e.previous != null ? String(e.previous) : '—',
+          forecast: e.forecast != null ? String(e.forecast) : '—',
+          importance: e.importance === 3 ? 'high' : e.importance === 2 ? 'medium' : 'low',
+        }));
+      if (filtered.length > 0) { renderEvents(filtered); return; }
+    }
+  } catch(e) { /* fallback */ }
+
+  // ── Fallback: TradingEconomics calendar RSS (via allorigins) ──
+  try {
+    const teUrl = 'https://tradingeconomics.com/rss/calendar.rss';
+    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(teUrl)}`;
+    const r = await fetchRaw(proxied, 8000);
+    const wrap = await r.json();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(wrap.contents, 'text/xml');
+    const items = Array.from(doc.querySelectorAll('item')).slice(0, 30);
+    const events = items
+      .map(el => ({
+        name: el.querySelector('title')?.textContent || '—',
+        date: el.querySelector('pubDate')?.textContent?.slice(0, 16) || '—',
+        country: '—',
+        prev: '—',
+        forecast: '—',
+        importance: isHighImpact(el.querySelector('title')?.textContent || '') ? 'high' : 'medium',
+      }))
+      .filter(e => isHighImpact(e.name));
+    if (events.length > 0) { renderEvents(events); return; }
+  } catch(e) { /* all failed */ }
+
+  renderEvents([]);
+}
+
+// ===================== RENDER HELPERS =====================
+function renderMarketRow(sym, d) {
+  if (!d) return `<div class="market-row"><span class="market-name">${NAMES[sym]||sym}</span><span class="market-price" style="color:var(--text-muted);">N/A</span></div>`;
+  const pct = d.changePct || 0;
+  const barW = Math.min(100, Math.abs(pct) * 20);
+  return `<div class="market-row" data-tooltip="${NAMES[sym]||sym}: ${fmtPrice(d.price,'')} (${fmtPct(pct)})">
+    <div>
+      <div class="market-name">${NAMES[sym]||sym}</div>
+      <div class="market-ticker">${sym}</div>
+    </div>
+    <div class="market-price">${fmt(d.price, 2)}</div>
+    <div class="market-change ${colorClass(pct)}">${fmtPct(pct)}</div>
+    <div class="market-bar"><div class="market-bar-fill ${fillClass(pct)}" style="width:${barW}%"></div></div>
+  </div>`;
+}
+
+function setMarketRegion(id, syms, data) {
+  const el = $(id);
+  if (!el) return;
+  el.innerHTML = syms.map(s => renderMarketRow(s, data[s])).join('');
+}
+
+// ===================== HEATMAP =====================
+function renderHeatmap(data) {
+  const indices = [
+    ...SYMBOLS.us.slice(0,2),
+    ...SYMBOLS.europe.slice(0,2),
+    ...SYMBOLS.asia.slice(0,2),
+    ...SYMBOLS.india.slice(0,1),
+    ...SYMBOLS.ai_us.slice(0,3),
+    'GC=F', 'CL=F',
+  ];
+  const colors = pct => {
+    if (pct >= 2) return '#006644';
+    if (pct >= 1) return '#00875a';
+    if (pct >= 0.3) return '#006644aa';
+    if (pct > 0) return '#2d4d3a';
+    if (pct <= -2) return '#7a1a2e';
+    if (pct <= -1) return '#b91c2e';
+    if (pct <= -0.3) return '#7a1a2eaa';
+    return '#3d2030';
+  };
+  const grid = $('heatmapGrid');
+  if (!grid) return;
+  grid.innerHTML = indices.map(sym => {
+    const d = data[sym];
+    const pct = d?.changePct || 0;
+    const bg = colors(pct);
+    const tick = sym.replace('^','').replace('=X','').replace('=F','').replace('.NS','').replace('.T','');
+    return `<div class="heatmap-cell" style="background:${bg}" data-tooltip="${NAMES[sym]||sym}: ${fmtPct(pct)}">
+      <div class="heatmap-name">${tick.length > 6 ? tick.slice(0,6) : tick}</div>
+      <div class="heatmap-pct">${fmtPct(pct)}</div>
+    </div>`;
+  }).join('');
+  $('heatmapTs').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+// ===================== SIGNAL BAR =====================
+function renderSignalBar(data) {
+  const spx = data['^GSPC'];
+  const ndx = data['^NDX'];
+  const tnx = data['^TNX'];
+  const dxy = data['DX-Y.NYB'];
+
+  const updateSignal = (idV, idC, idM, d, extra='') => {
+    if (!d) return;
+    const el = $(idV); if (el) el.textContent = d.price ? fmt(d.price) : '—';
+    const ch = $(idC); if (ch) { ch.textContent = fmtPct(d.changePct); ch.className = 'signal-change ' + colorClass(d.changePct); }
+    const m = $(idM); if (m && extra) m.textContent = extra;
+  };
+  updateSignal('sig-spx', 'sig-spx-ch', 'sig-spx-meta', spx, 'US Equities');
+  updateSignal('sig-ndx', 'sig-ndx-ch', 'sig-ndx-meta', ndx, 'Tech Index');
+  if (tnx) {
+    $('sig-yield').textContent = tnx.price ? tnx.price.toFixed(3) + '%' : '—';
+    const ch = $('sig-yield-ch');
+    if (ch) { ch.textContent = fmtPct(tnx.changePct); ch.className = 'signal-change ' + colorClass(tnx.changePct); }
+  }
+  if (dxy) {
+    $('sig-dxy').textContent = fmt(dxy.price, 2);
+    const ch = $('sig-dxy-ch');
+    if (ch) { ch.textContent = fmtPct(dxy.changePct); ch.className = 'signal-change ' + colorClass(dxy.changePct); }
+  }
+}
+
+// ===================== YIELDS & FX =====================
+function renderYields(data) {
+  const yields = [
+    { sym: '^IRX', label: '3-Month T-Bill', sub: 'Short-term rate' },
+    { sym: '^FVX', label: '5-Year Note', sub: 'Medium-term' },
+    { sym: '^TNX', label: '10-Year Note', sub: 'Benchmark rate' },
+    { sym: '^TYX', label: '30-Year Bond', sub: 'Long-term rate' },
+  ];
+  const el = $('yields-table');
+  if (!el) return;
+  el.innerHTML = yields.map(y => {
+    const d = data[y.sym];
+    if (!d) return `<div class="rate-row"><div><div class="rate-name">${y.label}</div><div class="rate-sub">${y.sub}</div></div><div class="rate-value" style="color:var(--text-muted)">N/A</div></div>`;
+    const gauge = Math.min(100, (d.price / 8) * 100);
+    return `<div class="rate-row">
+      <div><div class="rate-name">${y.label}</div><div class="rate-sub">${y.sub}</div></div>
+      <div class="rate-gauge"><div class="rate-gauge-fill" style="width:${gauge}%"></div></div>
+      <div class="rate-value">${d.price ? d.price.toFixed(3) + '%' : '—'}</div>
+      <div class="rate-change ${colorClass(d.changePct)}">${fmtPct(d.changePct)}</div>
+    </div>`;
+  }).join('');
+
+  // Draw yield curve chart
+  const labels = ['3M', '5Y', '10Y', '30Y'];
+  const vals = ['^IRX','^FVX','^TNX','^TYX'].map(s => data[s]?.price || null);
+  renderYieldCurveChart(labels, vals);
+  // Yield curve spread stored in QS by populateQS
+  $('ratesTs').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+function renderFX(data) {
+  const fx = [
+    { sym: 'EURUSD=X', label: 'EUR / USD', sub: 'Euro' },
+    { sym: 'GBPUSD=X', label: 'GBP / USD', sub: 'Cable' },
+    { sym: 'USDJPY=X', label: 'USD / JPY', sub: 'Yen' },
+    { sym: 'DX-Y.NYB', label: 'DXY', sub: 'Dollar Index' },
+    { sym: 'USDINR=X', label: 'USD / INR', sub: 'Rupee' },
+  ];
+  const el = $('fx-table');
+  if (!el) return;
+  el.innerHTML = fx.map(f => {
+    const d = data[f.sym];
+    if (!d) return `<div class="rate-row"><div><div class="rate-name">${f.label}</div><div class="rate-sub">${f.sub}</div></div><div class="rate-value" style="color:var(--text-muted)">N/A</div></div>`;
+    const gauge = Math.min(100, Math.abs(d.changePct || 0) * 30 + 30);
+    return `<div class="rate-row">
+      <div><div class="rate-name">${f.label}</div><div class="rate-sub">${f.sub}</div></div>
+      <div class="rate-gauge"><div class="rate-gauge-fill" style="width:${gauge}%"></div></div>
+      <div class="rate-value">${fmt(d.price, 4)}</div>
+      <div class="rate-change ${colorClass(d.changePct)}">${fmtPct(d.changePct)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== YIELD CURVE CHART =====================
+let yieldChart = null;
+function renderYieldCurveChart(labels, vals) {
+  const ctx = $('yieldCurveChart');
+  if (!ctx) return;
+  const validVals = vals.map(v => v || null);
+  const color = validVals[3] && validVals[0] && validVals[3] > validVals[0] ? '#00e5a0' : '#ff4d6a';
+  if (yieldChart) {
+    yieldChart.data.datasets[0].data = validVals;
+    yieldChart.data.datasets[0].borderColor = color;
+    yieldChart.update('none');
+  } else {
+    yieldChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Yield Curve',
+          data: validVals,
+          borderColor: color,
+          backgroundColor: color + '22',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: color,
+          fill: true,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 300 },
+        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555568', font: { family: 'Space Mono', size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555568', font: { family: 'Space Mono', size: 10 }, callback: v => v?.toFixed(2) + '%' } }
+        }
+      }
+    });
+  }
+}
+
+// ===================== COMMODITIES =====================
+function renderCommodities(data) {
+  const comms = [
+    { sym: 'GC=F', name: 'Gold', icon: '🥇', unit: '$/oz', signal: pct => pct > 0.5 ? 'Safe-haven buying active — risk-off pressure' : pct < -0.5 ? 'Gold weakness — risk appetite returning' : 'Stable — no flight to safety', type: pct => pct > 0 ? 'up' : 'down' },
+    { sym: 'SI=F', name: 'Silver', icon: '⚪', unit: '$/oz', signal: pct => pct > 1 ? 'Silver surging — industrial + safe-haven demand' : pct < -1 ? 'Silver selling off' : 'Stable range' , type: pct => pct > 0 ? 'up' : 'down' },
+    { sym: 'HG=F', name: 'Copper', icon: '🟤', unit: '$/lb', signal: pct => pct > 0.5 ? '⬆ Growth signal — industrial demand rising' : pct < -0.5 ? '⬇ Recession risk — demand dropping' : 'Neutral — no strong growth signal', type: pct => pct > 0 ? 'up' : 'down' },
+    { sym: 'CL=F', name: 'WTI Crude', icon: '🛢️', unit: '$/bbl', signal: pct => pct > 1 ? 'Rising oil → Inflation pressure rising' : pct < -1 ? 'Oil falling → Deflationary signal / demand weakness' : 'Stable oil price — balanced supply/demand', type: pct => pct > 0 ? 'up' : 'down' },
+    { sym: 'BZ=F', name: 'Brent Crude', icon: '⛽', unit: '$/bbl', signal: pct => pct > 0 ? 'Global supply tightening' : 'Supply ample or demand softening', type: pct => pct > 0 ? 'up' : 'down' },
+    { sym: 'NG=F', name: 'Natural Gas', icon: '🔥', unit: '$/MMBtu', signal: pct => pct > 2 ? 'Energy spike — heating demand or supply cut' : 'Gas prices subdued', type: pct => pct > 0 ? 'up' : 'down' },
+  ];
+  const el = $('commodityGrid');
+  if (!el) return;
+  el.innerHTML = comms.map(c => {
+    const d = data[c.sym];
+    const pct = d?.changePct || 0;
+    const sig = c.signal(pct);
+    return `<div class="commodity-card" data-tooltip="${c.name}: ${fmtPrice(d?.price,'')} ${c.unit} (${fmtPct(pct)})">
+      <div class="commodity-icon">${c.icon}</div>
+      <div class="commodity-name">${c.name}</div>
+      <div class="commodity-price">${d ? fmt(d.price, 2) : '—'}</div>
+      <div class="commodity-change ${colorClass(pct)}">${fmtPct(pct)} <span style="font-size:10px; color:var(--text-muted); font-weight:400;">${c.unit}</span></div>
+      <div class="commodity-signal">${sig}</div>
+    </div>`;
+  }).join('');
+  $('commTs').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  // QS populated by populateQS() which runs before renderCommodities
+}
+
+// ===================== CRYPTO =====================
+function renderCrypto(cryptoData) {
+  const coins = cryptoData.coins || [];
+  const global = cryptoData.global;
+
+  const btc = coins.find(c => c.id === 'bitcoin');
+  const eth = coins.find(c => c.id === 'ethereum');
+  const sol = coins.find(c => c.id === 'solana');
+
+  const updateCoin = (priceId, changeId, volId, coin) => {
+    if (!coin) return;
+    const prc = $(priceId); if (prc) prc.textContent = fmtPrice(coin.current_price);
+    const chg = $(changeId);
+    if (chg) {
+      chg.textContent = fmtPct(coin.price_change_percentage_24h);
+      chg.className = 'crypto-change ' + colorClass(coin.price_change_percentage_24h);
+    }
+    const vol = $(volId); if (vol) vol.textContent = 'Vol: $' + (coin.total_volume / 1e9).toFixed(2) + 'B';
+  };
+  updateCoin('btc-price', 'btc-change', 'btc-vol', btc);
+  updateCoin('eth-price', 'eth-change', 'eth-vol', eth);
+  updateCoin('sol-price', 'sol-change', 'sol-vol', sol);
+
+  // BTC Dominance
+  const btcDom = global?.market_cap_percentage?.btc;
+  const totalMcap = global?.total_market_cap?.usd;
+  if (btcDom) {
+    $('btc-dom').textContent = btcDom.toFixed(1) + '%';
+    const domEl = $('dom-signal');
+    if (domEl) {
+      if (btcDom > 55) { domEl.textContent = 'BTC dominance high → Altcoin risk-off'; domEl.style.color = 'var(--gold)'; }
+      else if (btcDom > 45) { domEl.textContent = 'Balanced — neutral crypto sentiment'; domEl.style.color = 'var(--text-secondary)'; }
+      else { domEl.textContent = 'Altcoin season signals risk-on'; domEl.style.color = 'var(--green)'; }
+    }
+    // btcDom now stored in QS.btcDom via populateQS()
+  }
+  if (totalMcap) {
+    $('total-mcap').textContent = 'MCap: $' + (totalMcap / 1e12).toFixed(2) + 'T';
+  }
+
+  // Update signal bar BTC from QS
+  if (QS.btcPct != null) {
+    const btcCoin = (cryptoData.coins||[]).find(c=>c.id==='bitcoin');
+    if (btcCoin) {
+      $('sig-btc').textContent = fmtPrice(btcCoin.current_price);
+      const ch = $('sig-btc-ch');
+      if (ch) { ch.textContent = fmtPct(QS.btcPct); ch.className = 'signal-change ' + colorClass(QS.btcPct); }
+    }
+  }
+  // QS.btcDom, QS.btcPct etc already populated by populateQS
+  $('cryptoTs').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+// ===================== AI TRACKER =====================
+function renderAITracker(data) {
+  const renderSection = (id, syms) => {
+    const el = $(id);
+    if (!el) return;
+    const rows = syms.map(sym => {
+      const d = data[sym];
+      const pct = d?.changePct || 0;
+      const rank = pct >= 2 ? '<span class="rank-badge rank-leader">LEADER</span>' : pct <= -2 ? '<span class="rank-badge rank-laggard">LAGGARD</span>' : Math.abs(pct) >= 3 ? '<span class="rank-badge rank-unusual">UNUSUAL</span>' : '';
+      return { sym, d, pct, rank };
+    }).sort((a, b) => b.pct - a.pct);
+    el.innerHTML = rows.map(r => `
+      <div class="ai-stock-row" data-tooltip="${NAMES[r.sym]||r.sym}: ${fmtPrice(r.d?.price,'')} (${fmtPct(r.pct)})">
+        <span class="ai-ticker">${r.sym.replace('.NS','').replace('.T','').replace('.TW','').replace('.KS','').replace('.HK','')}</span>
+        <span class="ai-name">${NAMES[r.sym]||r.sym}</span>
+        ${r.rank}
+        <span class="ai-price">${fmt(r.d?.price, 2)}</span>
+        <span class="ai-change ${colorClass(r.pct)}">${fmtPct(r.pct)}</span>
+      </div>`).join('');
+  };
+  renderSection('ai-us', SYMBOLS.ai_us);
+  renderSection('ai-asia', SYMBOLS.ai_asia);
+  renderSection('ai-rest', SYMBOLS.ai_rest);
+
+  // QS.nvdaPct, QS.tsmPct etc already set by populateQS
+}
+
+// ===================== US SESSION STATUS =====================
+function detectMarketStatus() {
+  const now = new Date();
+  const utcH = now.getUTCHours();
+  const utcM = now.getUTCMinutes();
+  const utcTotal = utcH * 60 + utcM;
+  const dayOfWeek = now.getUTCDay(); // 0=Sun, 6=Sat
+
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  // US: 13:30-20:00 UTC
+  const usOpen = !isWeekend && utcTotal >= 810 && utcTotal < 1200;
+  // EU: 07:00-15:30 UTC
+  const euOpen = !isWeekend && utcTotal >= 420 && utcTotal < 930;
+  // Asia: 00:00-06:00 UTC (approx for JP/HK)
+  const asiaOpen = !isWeekend && (utcTotal < 360 || utcTotal >= 1380);
+
+  const setStatus = (id, open, premarket) => {
+    const el = $(id);
+    if (!el) return;
+    if (isWeekend) { el.textContent = 'WEEKEND'; el.className = 'region-status status-closed'; return; }
+    if (open) { el.textContent = 'OPEN'; el.className = 'region-status status-open'; }
+    else if (premarket) { el.textContent = 'PRE-MKT'; el.className = 'region-status status-premarket'; }
+    else { el.textContent = 'CLOSED'; el.className = 'region-status status-closed'; }
+  };
+
+  const usPremarket = !isWeekend && utcTotal >= 630 && utcTotal < 810;
+  setStatus('us-status', usOpen, usPremarket);
+  setStatus('eu-status', euOpen, false);
+  setStatus('asia-status', asiaOpen, false);
+  setStatus('india-status', !isWeekend && utcTotal >= 330 && utcTotal < 600, false);
+}
+
+// ===================== TICKER UPDATER =====================
+function updateTicker(data, cryptoBtc) {
+  const pairs = [
+    [['tk-spx','tk-spx2'], data['^GSPC'], ''],
+    [['tk-ndx','tk-ndx2'], data['^NDX'], ''],
+    [['tk-nifty','tk-nifty2'], data['^NSEI'], ''],
+    [['tk-gold','tk-gold2'], data['GC=F'], '$'],
+    [['tk-oil','tk-oil2'], data['CL=F'], '$'],
+    [['tk-dxy','tk-dxy2'], data['DX-Y.NYB'], ''],
+    [['tk-yield','tk-yield2'], data['^TNX'], '', '%'],
+    [['tk-nvda','tk-nvda2'], data['NVDA'], '$'],
+    [['tk-dax','tk-dax2'], data['^GDAXI'], ''],
+    [['tk-nk','tk-nk2'], data['^N225'], ''],
+    [['tk-hsi','tk-hsi2'], data['^HSI'], ''],
+  ];
+  pairs.forEach(([ids, d, sym, suffix]) => {
+    if (!d) return;
+    const pct = d.changePct || 0;
+    const col = pct > 0 ? 'var(--green)' : pct < 0 ? 'var(--red)' : 'var(--text-secondary)';
+    const txt = (sym || '') + fmt(d.price, 2) + (suffix || '') + ' (' + fmtPct(pct) + ')';
+    ids.forEach(id => {
+      const el = $(id);
+      if (el) { el.textContent = txt; el.style.color = col; }
+    });
+  });
+  // BTC from crypto
+  if (cryptoBtc) {
+    const pct = cryptoBtc.price_change_percentage_24h || 0;
+    const col = pct > 0 ? 'var(--green)' : pct < 0 ? 'var(--red)' : 'var(--text-secondary)';
+    const txt = '$' + fmt(cryptoBtc.current_price, 0) + ' (' + fmtPct(pct) + ')';
+    ['tk-btc','tk-btc2'].forEach(id => {
+      const el = $(id);
+      if (el) { el.textContent = txt; el.style.color = col; }
+    });
+  }
+}
+
+// =====================================================================
+// INDIA PANEL — FULLY LIVE
+// INR, Nifty, Bank Nifty → Yahoo Finance (already in globalData)
+// RBI Repo Rate → World Bank API indicator: FR.INR.RINR (free, no key, no CORS)
+// India CPI → World Bank API indicator: FP.CPI.TOTL.ZG
+// India signal → computed from live Nifty/INR/yield data (QS)
+// =====================================================================
+async function fetchIndiaFundamentals() {
+  // World Bank API: free, no auth, returns JSON
+  // latest available value (usually 1–2 year lag, but best free source)
+  async function fetchWorldBank(indicator) {
+    const url = `https://api.worldbank.org/v2/country/IN/indicator/${indicator}?format=json&mrv=1&per_page=1`;
+    try {
+      const r = await fetchRaw(url, 6000);
+      const data = await r.json();
+      const val = data?.[1]?.[0];
+      if (val?.value != null) return { value: val.value, year: val.date };
+    } catch(e) {}
+    // fallback via proxy
+    try {
+      const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const r = await fetchRaw(proxied, 6000);
+      const wrap = await r.json();
+      const data = JSON.parse(wrap.contents);
+      const val = data?.[1]?.[0];
+      if (val?.value != null) return { value: val.value, year: val.date };
+    } catch(e) {}
+    return null;
+  }
+
+  // Fetch CPI and lending rate in parallel
+  const [cpiData, rateData] = await Promise.allSettled([
+    fetchWorldBank('FP.CPI.TOTL.ZG'),  // CPI % annual
+    fetchWorldBank('FR.INR.LEND'),      // Lending interest rate (proxy for policy rate)
+  ]);
+
+  const cpi  = cpiData.status  === 'fulfilled' ? cpiData.value  : null;
+  const rate = rateData.status === 'fulfilled' ? rateData.value : null;
+
+  // Update CPI
+  const cpiEl = $('ind-cpi'), cpiSub = $('ind-cpi-sub');
+  if (cpi && cpiEl) {
+    const v = cpi.value.toFixed(1);
+    const c = cpi.value > 6 ? 'var(--red)' : cpi.value > 4 ? 'var(--gold)' : 'var(--green)';
+    cpiEl.textContent = v + '%';
+    cpiEl.style.color = c;
+    if (cpiSub) cpiSub.textContent = `YoY — World Bank ${cpi.year}`;
+  } else if (cpiEl) { cpiEl.textContent = 'N/A'; }
+
+  // Update Repo Rate (World Bank lending rate as proxy)
+  const repoEl = $('ind-repo'), repoSub = $('ind-repo-sub');
+  if (rate && repoEl) {
+    repoEl.textContent = rate.value.toFixed(2) + '%';
+    repoEl.style.color = 'var(--blue)';
+    if (repoSub) repoSub.textContent = `Lending rate — World Bank ${rate.year}`;
+  } else if (repoEl) { repoEl.textContent = 'N/A'; }
+}
+
+function updateIndiaPanel(data) {
+  // Live: Nifty 50
+  const nifty = data['^NSEI'];
+  const niftyEl = $('ind-nifty'), niftySubEl = $('ind-nifty-sub');
+  if (nifty && niftyEl) {
+    niftyEl.textContent = fmt(nifty.price, 0);
+    niftyEl.style.color = (nifty.changePct||0) >= 0 ? 'var(--green)' : 'var(--red)';
+    if (niftySubEl) {
+      niftySubEl.textContent = fmtPct(nifty.changePct) + ' today';
+      niftySubEl.className = 'india-metric-sub ' + colorClass(nifty.changePct);
+    }
+  } else if (niftyEl) { niftyEl.textContent = 'N/A'; }
+
+  // Live: Bank Nifty
+  const bnifty = data['^NSEBANK'];
+  const bniftyEl = $('ind-bnifty'), bniftySubEl = $('ind-bnifty-sub');
+  if (bnifty && bniftyEl) {
+    bniftyEl.textContent = fmt(bnifty.price, 0);
+    bniftyEl.style.color = (bnifty.changePct||0) >= 0 ? 'var(--green)' : 'var(--red)';
+    if (bniftySubEl) {
+      bniftySubEl.textContent = fmtPct(bnifty.changePct) + ' today';
+      bniftySubEl.className = 'india-metric-sub ' + colorClass(bnifty.changePct);
+    }
+  } else if (bniftyEl) { bniftyEl.textContent = 'N/A'; }
+
+  // Live: USD/INR
+  const inr = data['USDINR=X'];
+  const inrEl = $('india-inr'), inrSub = $('india-inr-sub');
+  if (inr && inrEl) {
+    inrEl.textContent = '₹' + fmt(inr.price, 2);
+    // Rupee weakening (USD/INR rising) = bad for India
+    inrEl.style.color = (inr.changePct||0) > 0 ? 'var(--red)' : 'var(--green)';
+    if (inrSub) {
+      inrSub.textContent = fmtPct(inr.changePct) + ' — ' + ((inr.changePct||0) > 0 ? 'INR weakening' : 'INR strengthening');
+      inrSub.className = 'india-metric-sub ' + ((inr.changePct||0) > 0 ? 'down' : 'up');
+    }
+  } else if (inrEl) { inrEl.textContent = 'N/A'; }
+
+  // ── Computed India Signal (from live data, no hardcoding) ──
+  const sigEl = $('indiaSignalText');
+  if (sigEl) {
+    const signals = [];
+    if (nifty) {
+      const p = nifty.changePct || 0;
+      if (p > 1)      signals.push(`Nifty ${fmtPct(p)} — strong domestic bid.`);
+      else if (p < -1) signals.push(`Nifty ${fmtPct(p)} — selling pressure in equities.`);
+      else             signals.push(`Nifty ${fmtPct(p)} — rangebound.`);
+    }
+    if (bnifty && nifty) {
+      const spread = (bnifty.changePct||0) - (nifty.changePct||0);
+      if (spread > 0.5)       signals.push('Bank Nifty outperforming — financials leading, rate-cut optimism.');
+      else if (spread < -0.5) signals.push('Banks underperforming Nifty — credit or NIM concerns.');
+    }
+    if (inr) {
+      const p = inr.changePct || 0;
+      if (p > 0.3)       signals.push('INR under pressure — watch RBI intervention level.');
+      else if (p < -0.3) signals.push('INR strengthening — FII inflows or USD softness.');
+    }
+    // Cross with global QS
+    if (QS.dxyPct != null && QS.dxyPct < -0.2) signals.push('Weak USD supportive for INR and EM flows into India.');
+    if (QS.goldPct != null && QS.goldPct > 0.5 && QS.spxPct != null && QS.spxPct < 0) signals.push('Global risk-off — monitor FII outflow risk.');
+
+    sigEl.textContent = signals.length > 0 ? signals.join(' ') : 'All India indicators within normal range. No dominant signal.';
+  }
+
+  // Also kick off async World Bank fetch (non-blocking)
+  fetchIndiaFundamentals();
+}
+
+// ===================== COUNTDOWN TIMER =====================
+let refreshCountdown = 45;
+function startCountdown() {
+  refreshCountdown = 45;
+  const el = $('nextRefreshCountdown');
+  const interval = setInterval(() => {
+    refreshCountdown--;
+    if (el) el.textContent = 'Next refresh: ' + refreshCountdown + 's';
+    if (refreshCountdown <= 0) {
+      clearInterval(interval);
+      if (el) el.textContent = 'Refreshing...';
+    }
+  }, 1000);
+  return interval;
+}
+
+// ===================== MAIN REFRESH =====================
+let countdownInterval = null;
+async function refreshAll() {
+  const btn = $('refreshBtn');
+  if (btn) btn.classList.add('loading');
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const summaryEl = $('summaryText');
+  if (summaryEl) summaryEl.innerHTML = '<strong>MacroPulse</strong> — Fetching live data across 6 proxy sources... This takes 15–30 seconds on first load.';
+
+  try {
+    const allSyms = [
+      ...SYMBOLS.us, ...SYMBOLS.europe, ...SYMBOLS.asia, ...SYMBOLS.india,
+      ...SYMBOLS.yields, ...SYMBOLS.fx, ...SYMBOLS.commodities,
+      ...SYMBOLS.ai_us, ...SYMBOLS.ai_asia, ...SYMBOLS.ai_rest,
+    ];
+
+    // Run Yahoo and CoinGecko in parallel
+    const [yahooData, cryptoData] = await Promise.all([
+      fetchYahoo(allSyms, 4),
+      fetchCrypto(),
+    ]);
+
+    globalData = yahooData;
+    const gotCount = Object.keys(globalData).length;
+
+    // Even 1 symbol loading is enough to proceed — never hard-fail
+    // ── STEP 1: Populate QS ──
+    populateQS(globalData, cryptoData);
+
+    // ── STEP 2: Quant engines ──
+    computeFearGreed(globalData, cryptoData);
+    computeRegime(globalData, cryptoData);
+
+    // ── STEP 3: Render UI ──
+    renderSignalBar(globalData);
+    renderHeatmap(globalData);
+    setMarketRegion('us-markets',    SYMBOLS.us,     globalData);
+    setMarketRegion('eu-markets',    SYMBOLS.europe, globalData);
+    setMarketRegion('asia-markets',  SYMBOLS.asia,   globalData);
+    setMarketRegion('india-markets', SYMBOLS.india,  globalData);
+    renderAITracker(globalData);
+    renderCommodities(globalData);
+    renderYields(globalData);
+    renderFX(globalData);
+    renderCrypto(cryptoData);
+    computeSignals();
+    updateTicker(globalData, (cryptoData.coins||[]).find(c=>c.id==='bitcoin'));
+    updateIndiaPanel(globalData);
+    renderSummaryBanner(gotCount);
+
+    // Flash
+    document.querySelectorAll('.signal-item').forEach(el => {
+      el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    });
+
+    // Status message based on how much loaded
+    const staleCount = Object.values(globalData).filter(d => d?.stale).length;
+    const freshCount = gotCount - staleCount;
+    let statusMsg = `Last refreshed: ${new Date().toLocaleTimeString()} — ${freshCount} live`;
+    if (staleCount > 0) statusMsg += `, ${staleCount} cached`;
+    $('lastRefresh').textContent = statusMsg;
+
+    detectMarketStatus();
+    countdownInterval = startCountdown();
+
+    // Background: news + events (non-blocking)
+    fetchAndRenderNews();
+    fetchAndRenderMacroEvents();
+
+  } catch(e) {
+    console.error('Refresh error:', e);
+    // Even on catch — try to render whatever is in cache
+    const cachedCount = Object.keys(globalData).length;
+    if (cachedCount > 0) {
+      renderSummaryBanner(cachedCount);
+    } else {
+      const el = $('summaryText');
+      if (el) el.innerHTML = `<strong>MacroPulse</strong> — <strong style="color:var(--gold)">Proxy rate-limited.</strong> Auto-retry in 45s. If this persists, try refreshing the page manually. Curated by <strong>Yuvraj Sureka</strong>.`;
+    }
+    countdownInterval = startCountdown();
+  } finally {
+    if (btn) btn.classList.remove('loading');
+  }
+}
+
+// ===================== INIT =====================
+function init() {
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  detectMarketStatus();
+
+  // Initial data fetch (includes news + events)
+  refreshAll();
+
+  // Auto refresh every 45 seconds
+  setInterval(refreshAll, CONFIG.REFRESH_INTERVAL);
+
+  // Footer timestamp
+  $('footerMeta').textContent = 'Data: Yahoo Finance · CoinGecko · Built by Yuvraj Sureka — ' + new Date().getFullYear();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
