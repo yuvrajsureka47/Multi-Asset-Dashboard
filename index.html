@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<!--
+  MacroPulse — Multi Asset Global Macro Dashboard
+  Curated by Yuvraj Sureka | IB Analyst | CFA L2 | Equity Research | Trading
+  
+  FILES:
+    index.html  ← this file
+    style.css   ← all styling
+    app.js      ← data engine + render functions
+  
+  TO ENABLE LIVE DATA: Upload all 3 files to GitHub Pages or Netlify.
+  Local file:// protocol blocks CORS proxies — data will not load locally.
+  
+  DATA SOURCES:
+    Yahoo Finance  → corsproxy.io / allorigins (equities, yields, FX, commodities)
+    CoinGecko      → direct (crypto — CORS enabled)
+    Binance        → direct fallback (crypto)
+    Frankfurter    → direct (FX rates — CORS enabled)
+    open.er-api    → direct fallback (FX rates)
+    Reuters RSS    → allorigins proxy (news)
+    BBC Business   → allorigins proxy (news fallback)
+    Econdb         → allorigins proxy (macro calendar)
+    World Bank     → direct (India fundamentals — CORS enabled)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroPulse — Global Macro Dashboard | Yuvraj Sureka</title>
+  <meta name="description" content="Real-time global macro dashboard tracking equities, bonds, FX, commodities, crypto and AI stocks. Curated by Yuvraj Sureka.">
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js for yield curve visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER
+     ================================================================ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">YS</div>
+      <div>
+        <div class="logo-text">MacroPulse</div>
+        <div class="logo-sub">IB Analyst · CFA L2 · Equity Research · Trading</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="session-pill" id="sessionPill">DETECTING...</span>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <div class="clock" id="headerTime">--:--:-- UTC</div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+        <span class="ri" id="refreshIcon">↻</span> Refresh
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ================================================================
+     TICKER BAR
+     ================================================================ -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <!-- First pass -->
+    <span class="ticker-item"><span class="t-sym">S&amp;P 500</span>&nbsp;<span class="t-price" id="tk-spx">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NASDAQ</span>&nbsp;<span class="t-price" id="tk-ndx">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NIFTY 50</span>&nbsp;<span class="t-price" id="tk-nifty">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">BITCOIN</span>&nbsp;<span class="t-price" id="tk-btc">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">GOLD</span>&nbsp;<span class="t-price" id="tk-gold">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">WTI OIL</span>&nbsp;<span class="t-price" id="tk-oil">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">DXY</span>&nbsp;<span class="t-price" id="tk-dxy">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">US 10Y</span>&nbsp;<span class="t-price" id="tk-yield">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NVIDIA</span>&nbsp;<span class="t-price" id="tk-nvda">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">DAX</span>&nbsp;<span class="t-price" id="tk-dax">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NIKKEI</span>&nbsp;<span class="t-price" id="tk-nk">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">HANG SENG</span>&nbsp;<span class="t-price" id="tk-hsi">—</span><span class="t-sep">&nbsp;|</span></span>
+    <!-- Duplicate for seamless loop -->
+    <span class="ticker-item"><span class="t-sym">S&amp;P 500</span>&nbsp;<span class="t-price" id="tk-spx2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NASDAQ</span>&nbsp;<span class="t-price" id="tk-ndx2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NIFTY 50</span>&nbsp;<span class="t-price" id="tk-nifty2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">BITCOIN</span>&nbsp;<span class="t-price" id="tk-btc2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">GOLD</span>&nbsp;<span class="t-price" id="tk-gold2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">WTI OIL</span>&nbsp;<span class="t-price" id="tk-oil2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">DXY</span>&nbsp;<span class="t-price" id="tk-dxy2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">US 10Y</span>&nbsp;<span class="t-price" id="tk-yield2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NVIDIA</span>&nbsp;<span class="t-price" id="tk-nvda2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">DAX</span>&nbsp;<span class="t-price" id="tk-dax2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">NIKKEI</span>&nbsp;<span class="t-price" id="tk-nk2">—</span><span class="t-sep">&nbsp;|</span></span>
+    <span class="ticker-item"><span class="t-sym">HANG SENG</span>&nbsp;<span class="t-price" id="tk-hsi2">—</span><span class="t-sep">&nbsp;|</span></span>
+  </div>
+</div>
+
+<!-- ================================================================
+     MAIN CONTENT
+     ================================================================ -->
+<div class="container">
+
+  <!-- SUMMARY BANNER -->
+  <div class="summary-banner">
+    <span style="font-size:20px;">🧭</span>
+    <div class="summary-text" id="summaryText">
+      <strong>MacroPulse</strong> — Initializing data feeds across 6 proxy sources...
+    </div>
+    <div class="summary-refresh">
+      Auto-refresh: 45s<br>
+      <span id="nextRefresh">Loading...</span>
+    </div>
+  </div>
+
+  <!-- ── MACRO REGIME ─────────────────────────────────────── -->
+  <div class="regime-bar">
+    <div class="regime-lbl">MARKET REGIME</div>
+    <div class="regime-items" id="regimeItems">
+      <div class="regime-item">Growth</div>
+      <div class="regime-item">Inflation</div>
+      <div class="regime-item">Liquidity</div>
+      <div class="regime-item">Stress</div>
+    </div>
+    <div class="regime-conf">
+      <span id="regimeConf">Awaiting data...</span>
+      <div class="conf-track"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- ── SIGNAL BAR ────────────────────────────────────────── -->
+  <div class="signal-bar">
+    <div class="sig-card s-flat" data-sig="^GSPC">
+      <div class="sig-lbl">S&amp;P 500</div>
+      <div class="sig-val" id="sig-spx">—</div>
+      <div class="sig-chg flat" id="sig-spx-ch">—</div>
+      <div class="sig-meta" id="sig-spx-meta">US Equities</div>
+    </div>
+    <div class="sig-card s-flat" data-sig="^NDX">
+      <div class="sig-lbl">NASDAQ 100</div>
+      <div class="sig-val" id="sig-ndx">—</div>
+      <div class="sig-chg flat" id="sig-ndx-ch">—</div>
+      <div class="sig-meta" id="sig-ndx-meta">Tech Index</div>
+    </div>
+    <div class="sig-card s-flat">
+      <div class="sig-lbl">US 10Y YIELD</div>
+      <div class="sig-val" id="sig-yield">—</div>
+      <div class="sig-chg flat" id="sig-yield-ch">—</div>
+      <div class="sig-meta">Benchmark Rate</div>
+    </div>
+    <div class="sig-card s-flat">
+      <div class="sig-lbl">DXY (USD)</div>
+      <div class="sig-val" id="sig-dxy">—</div>
+      <div class="sig-chg flat" id="sig-dxy-ch">—</div>
+      <div class="sig-meta">Dollar Index</div>
+    </div>
+    <div class="sig-card s-flat">
+      <div class="sig-lbl">BITCOIN</div>
+      <div class="sig-val" id="sig-btc">—</div>
+      <div class="sig-chg flat" id="sig-btc-ch">—</div>
+      <div class="sig-meta">Crypto Sentiment</div>
+    </div>
+  </div>
+
+  <!-- ── FEAR & GREED GAUGE ─────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-red">🎯 Sentiment</span>
+    <span class="sec-title">Fear &amp; Greed Index</span>
+    <span class="sec-sub">Weighted composite — 6 live signals</span>
+  </div>
+  <div class="gauge-section">
+    <div class="gauge-left">
+      <div class="gauge-main-lbl">Fear &amp; Greed Index</div>
+      <div class="gauge-sub-lbl">Composite Score / 100</div>
+      <div class="gauge-score" id="gaugeScore" style="color:var(--txt-3)">—</div>
+      <div class="gauge-label" id="gaugeLabel" style="color:var(--txt-3)">AWAITING DATA</div>
+      <div class="gauge-track">
+        <div class="gauge-needle" id="gaugeNeedle" style="left:50%"></div>
+      </div>
+      <div class="gauge-axis"><span>FEAR</span><span>GREED</span></div>
+    </div>
+    <div class="gauge-comps">
+      <div class="gauge-comp">
+        <div class="gc-name">Equity Momentum</div>
+        <div class="gc-val" id="gc-eq" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-eq" style="width:0%"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gc-name">Volatility Regime</div>
+        <div class="gc-val" id="gc-vol" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-vol" style="width:0%"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gc-name">USD Liquidity</div>
+        <div class="gc-val" id="gc-usd" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-usd" style="width:0%"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gc-name">Yield Curve</div>
+        <div class="gc-val" id="gc-crv" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-crv" style="width:0%"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gc-name">Gold Safe Haven</div>
+        <div class="gc-val" id="gc-gld" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-gld" style="width:0%"></div></div>
+      </div>
+      <div class="gauge-comp">
+        <div class="gc-name">Crypto Risk</div>
+        <div class="gc-val" id="gc-cry" style="color:var(--txt-3)">—</div>
+        <div class="gc-bar"><div class="gc-fill" id="gcb-cry" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NEWS ──────────────────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-red">🔴 Breaking</span>
+    <span class="sec-title">Market-Moving News</span>
+    <span class="sec-sub" id="newsTimestamp">Fetching live headlines...</span>
+  </div>
+  <div class="news-grid" id="newsGrid">
+    <div class="news-item" style="grid-column:1/-1;text-align:center;padding:24px;">
+      <div class="skeleton" style="height:14px;width:50%;margin:0 auto 8px;"></div>
+      <div class="skeleton" style="height:14px;width:35%;margin:0 auto;"></div>
+      <div style="font-size:11px;color:var(--txt-3);margin-top:12px;font-family:var(--f-mono)">Fetching from Reuters RSS...</div>
+    </div>
+  </div>
+
+  <!-- ── GLOBAL HEATMAP ─────────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-green">🌐 Global Risk</span>
+    <span class="sec-title">World Market Heatmap</span>
+    <span class="sec-sub">Live color intensity = magnitude of move</span>
+  </div>
+  <div class="heatmap-grid" id="heatmapGrid">
+    <!-- Filled by app.js -->
+  </div>
+
+  <!-- ── REGIONAL MARKET TABLES ─────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-green">📊 Markets</span>
+    <span class="sec-title">Global Index Dashboard</span>
+    <span class="sec-sub">All prices via Yahoo Finance</span>
+  </div>
+  <div class="market-grid">
+    <div class="mkt-region">
+      <div class="mkt-region-hdr">
+        <span>🇺🇸</span>
+        <span class="mkt-region-name">United States</span>
+        <span class="mkt-status s-closed" id="us-status">DETECTING</span>
+      </div>
+      <div id="us-markets"><div class="skeleton" style="height:40px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+    <div class="mkt-region">
+      <div class="mkt-region-hdr">
+        <span>🇪🇺</span>
+        <span class="mkt-region-name">Europe</span>
+        <span class="mkt-status s-closed" id="eu-status">DETECTING</span>
+      </div>
+      <div id="eu-markets"><div class="skeleton" style="height:40px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+    <div class="mkt-region">
+      <div class="mkt-region-hdr">
+        <span>🌏</span>
+        <span class="mkt-region-name">Asia Pacific</span>
+        <span class="mkt-status s-closed" id="asia-status">DETECTING</span>
+      </div>
+      <div id="asia-markets"><div class="skeleton" style="height:40px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+    <div class="mkt-region">
+      <div class="mkt-region-hdr">
+        <span>🇮🇳</span>
+        <span class="mkt-region-name">India</span>
+        <span class="mkt-status s-closed" id="india-status">DETECTING</span>
+      </div>
+      <div id="india-markets"><div class="skeleton" style="height:40px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+  </div>
+
+  <!-- ── AI & SEMICONDUCTOR TRACKER ────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-purple">🧠 AI Edge</span>
+    <span class="sec-title">AI &amp; Semiconductor Flow Tracker</span>
+    <span class="sec-sub">Ranked by % move — leaders/laggards auto-detected</span>
+  </div>
+  <div class="ai-grid">
+    <div class="ai-panel">
+      <div class="ai-panel-hdr" data-ai-hdr="ai-us">🇺🇸 US Megacaps</div>
+      <div id="ai-us"><div class="skeleton" style="height:30px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-panel-hdr" data-ai-hdr="ai-tw">🇹🇼 Taiwan / Korea</div>
+      <div id="ai-tw"><div class="skeleton" style="height:30px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-panel-hdr" data-ai-hdr="ai-rest">🇯🇵 Japan / China</div>
+      <div id="ai-rest"><div class="skeleton" style="height:30px;margin:8px;border-radius:6px;"></div></div>
+    </div>
+  </div>
+
+  <!-- ── COMMODITIES ────────────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-orange">🛢️ Commodities</span>
+    <span class="sec-title">Commodity &amp; Inflation Signals</span>
+    <span class="sec-sub" id="commTs">—</span>
+  </div>
+  <div class="comm-grid" id="commodityGrid">
+    <!-- Filled by app.js -->
+  </div>
+
+  <!-- ── RATES & FX ─────────────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-blue">💰 Rates &amp; FX</span>
+    <span class="sec-title">Treasury Yields &amp; Currency</span>
+    <span class="sec-sub">Yahoo Finance + Frankfurter.app</span>
+  </div>
+  <div class="rates-grid">
+    <div class="rates-card">
+      <div class="rates-card-hdr">US Treasury Yield Curve</div>
+      <div id="yieldsTable"></div>
+      <div style="padding:12px 16px 14px;">
+        <div style="font-size:10px;font-family:var(--f-mono);color:var(--txt-3);margin-bottom:8px;" id="curveSpreadLbl">Computing spread...</div>
+        <div style="position:relative;width:100%;height:90px;">
+          <canvas id="yieldCurveChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="rates-card">
+      <div class="rates-card-hdr">Foreign Exchange</div>
+      <div id="fxTable"></div>
+    </div>
+  </div>
+
+  <!-- ── CRYPTO ─────────────────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-gold">₿ Crypto</span>
+    <span class="sec-title">Crypto Risk Sentiment</span>
+    <span class="sec-sub">CoinGecko direct API</span>
+  </div>
+  <div class="crypto-grid">
+    <div class="crypto-card">
+      <div class="crypto-sym">
+        <div class="c-icon i-btc">₿</div>
+        <span class="c-name">BITCOIN</span>
+      </div>
+      <div class="c-price" id="btc-price">—</div>
+      <div class="c-chg flat" id="btc-chg">Loading...</div>
+      <div class="c-sub" id="btc-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-sym">
+        <div class="c-icon i-eth">Ξ</div>
+        <span class="c-name">ETHEREUM</span>
+      </div>
+      <div class="c-price" id="eth-price">—</div>
+      <div class="c-chg flat" id="eth-chg">Loading...</div>
+      <div class="c-sub" id="eth-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-sym">
+        <div class="c-icon i-sol">◎</div>
+        <span class="c-name">SOLANA</span>
+      </div>
+      <div class="c-price" id="sol-price">—</div>
+      <div class="c-chg flat" id="sol-chg">Loading...</div>
+      <div class="c-sub" id="sol-vol">Vol: —</div>
+    </div>
+    <div class="crypto-card">
+      <div class="crypto-sym">
+        <div class="c-icon i-dom">⬡</div>
+        <span class="c-name">BTC DOMINANCE</span>
+      </div>
+      <div class="c-price" id="btc-dom">—</div>
+      <div class="c-chg flat" id="dom-signal">Loading...</div>
+      <div class="c-sub" id="total-mcap">MCap: —</div>
+    </div>
+  </div>
+
+  <!-- ── CROSS-ASSET SIGNALS ────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-cyan">🔗 Signal Engine</span>
+    <span class="sec-title">Cross-Asset Intelligence</span>
+    <span class="sec-sub">Auto-generated from live data — Yuvraj Sureka signal model</span>
+  </div>
+  <div class="signals-grid" id="signalsGrid">
+    <div class="signal-card">
+      <div class="sig-icon">📡</div>
+      <div class="sig-content">
+        <span class="sig-type type-watch">INITIALIZING</span>
+        <div class="sig-heading">Signal engine loading...</div>
+        <div class="sig-desc">Waiting for live data to compute cross-asset signals.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── INDIA MACRO PANEL ──────────────────────────────────── -->
+  <div class="sec-hdr">
+    <span class="sec-tag tag-india">🇮🇳 India Focus</span>
+    <span class="sec-title">India Macro Snapshot</span>
+    <span class="sec-sub">Live prices — refreshed every 45 seconds</span>
+  </div>
+  <div class="india-panel">
+    <div style="font-size:10px;font-family:var(--f-mono);color:var(--txt-3);text-transform:uppercase;letter-spacing:1px;">
+      All values live from Yahoo Finance — as of this minute
+    </div>
+    <div class="india-grid">
+      <div class="ind-metric">
+        <div class="ind-name">Nifty 50</div>
+        <div class="ind-val" id="ind-nifty">—</div>
+        <div class="ind-sub" id="ind-nifty-sub" style="color:var(--txt-3)">Loading...</div>
+      </div>
+      <div class="ind-metric">
+        <div class="ind-name">Bank Nifty</div>
+        <div class="ind-val" id="ind-bnifty">—</div>
+        <div class="ind-sub" id="ind-bnifty-sub" style="color:var(--txt-3)">Loading...</div>
+      </div>
+      <div class="ind-metric">
+        <div class="ind-name">USD / INR</div>
+        <div class="ind-val" id="ind-inr">—</div>
+        <div class="ind-sub" id="ind-inr-sub" style="color:var(--txt-3)">Loading...</div>
+      </div>
+      <div class="ind-metric">
+        <div class="ind-name">Reliance Inds</div>
+        <div class="ind-val" id="ind-rel">—</div>
+        <div class="ind-sub" id="ind-rel-sub" style="color:var(--txt-3)">Loading...</div>
+      </div>
+      <div class="ind-metric">
+        <div class="ind-name">TCS</div>
+        <div class="ind-val" id="ind-tcs">—</div>
+        <div class="ind-sub" id="ind-tcs-sub" style="color:var(--txt-3)">Loading...</div>
+      </div>
+    </div>
+    <div class="india-sig">
+      <strong style="color:var(--green);">Live Signal:</strong>
+      <span id="indiaSignalText">Computing from live market data...</span>
+    </div>
+  </div>
+
+
+</div><!-- /container -->
+
+<!-- ================================================================
+     DISCLAIMER
+     ================================================================ -->
+<div class="disclaimer">
+  <div class="disclaimer-inner">
+    <span style="font-size:16px;flex-shrink:0;">⚠️</span>
+    <div class="disclaimer-text">
+      <strong style="color:var(--red);">DISCLAIMER:</strong>
+      This dashboard is for <strong>informational and educational purposes only</strong> and was built with the help of AI.
+      Nothing here constitutes financial advice, investment advice, trading advice, or any other form of advice.
+      All data, signals, scores, and commentary are generated from publicly available market data and automated quantitative analysis.
+      Past performance is not indicative of future results.
+      Always consult a qualified financial advisor before making investment decisions.
+      The creator assumes no liability for any decisions made based on this dashboard.
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer class="footer">
+  <div class="footer-inner">
+
+    <!-- Branding -->
+    <div>
+      <div class="footer-brand">MacroPulse <span>by Yuvraj Sureka</span></div>
+      <div class="footer-meta">Curated with the help of AI &nbsp;·&nbsp; Not Financial Advice</div>
+      <div class="cred-tags">
+        <span class="cred-tag" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(77,159,255,.2)">IB Analyst</span>
+        <span class="cred-tag" style="background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,200,66,.2)">CFA Level II</span>
+        <span class="cred-tag" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(0,229,160,.2)">Equity Research</span>
+        <span class="cred-tag" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(176,106,255,.2)">Trading</span>
+      </div>
+    </div>
+
+    <!-- Contact links -->
+    <div class="footer-contacts">
+      <a href="https://www.linkedin.com/in/yuvrajsureka47" target="_blank" rel="noopener" class="contact-link c-linkedin">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a66c2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        linkedin.com/in/yuvrajsureka47
+      </a>
+      <a href="mailto:yuvrajsureka47@gmail.com" class="contact-link c-gmail">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#ea4335"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.009l8.073-5.516C21.69 2.28 24 3.434 24 5.457z"/></svg>
+        yuvrajsureka47@gmail.com
+      </a>
+      <a href="tel:+916001930875" class="contact-link c-phone">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#00e5a0"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        +91 6001930875
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom strip -->
+  <div class="footer-strip">
+    <div id="lastRefresh">Last refreshed: —</div>
+    <div>© 2026 Yuvraj Sureka &nbsp;·&nbsp; <span style="color:var(--red)">Not Financial Advice</span></div>
+    <div id="footerMeta">MacroPulse · Built with AI · Data: Yahoo Finance · CoinGecko · Frankfurter · World Bank</div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
